@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User View</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>👁 USER DETAILS</h1>
+
+<div class="container">
+  <img id="photo" class="photo">
+  <pre id="details"></pre>
+  <button onclick="edit()">EDIT USER</button>
+</div>
+
+<script>
+const BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"; // insert manually
+const data = JSON.parse(sessionStorage.getItem("viewData") || "{}");
+
+if (data.file_path) {
+  photo.src = `https://api.telegram.org/file/bot${BOT_TOKEN}/${data.file_path}`;
+}
+
+details.textContent = `
+Name: ${data.name}
+Aadhar: ${data.aadhar}
+Phone: ${data.phone}
+PAN: ${data.pan}
+DOB: ${data.dob}
+Address: ${data.address}
+Info: ${data.info}
+Education: ${data.education}
+Family: ${data.family}
+`;
+
+function edit() {
+  sessionStorage.setItem("editData", JSON.stringify(data));
+  window.location.href = "edit.html";
+}
+</script>
+
+</body>
+</html>
