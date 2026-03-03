@@ -1,32 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Hacker DB Search</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>User Database</title>
+<style>
+body {
+  background: #0a0a0a;
+  color: #00ff99;
+  font-family: monospace;
+  padding: 20px;
+}
+input, textarea {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+  background: #111;
+  color: #0f0;
+  border: 1px solid #0f0;
+}
+button {
+  padding: 10px;
+  background: #00ff99;
+  border: none;
+  width: 100%;
+  margin-top: 10px;
+}
+.card {
+  border: 1px solid #0f0;
+  padding: 10px;
+  margin-top: 20px;
+}
+img {
+  width: 200px;
+  border: 2px solid #0f0;
+}
+</style>
 </head>
 <body>
 
-<h1>⚡ USER SEARCH TERMINAL ⚡</h1>
+<h1>USER DATABASE</h1>
 
-<div class="container">
-  <input id="query" placeholder="Search by name / aadhar / phone">
-  <button onclick="searchUser()">SEARCH</button>
-</div>
+<h2>Add / Edit User</h2>
+<input type="file" id="photo">
+<input type="text" id="name" placeholder="Name">
+<input type="text" id="aadhar" placeholder="Aadhar">
+<input type="text" id="phone" placeholder="Phone">
+<input type="text" id="pan" placeholder="PAN">
+<input type="text" id="dob" placeholder="DOB">
+<input type="text" id="address" placeholder="Address">
+<input type="text" id="info" placeholder="Info">
+<input type="text" id="family" placeholder="Family">
+
+<button onclick="saveUser()">SAVE USER</button>
+
+<hr>
+
+<h2>Search User</h2>
+<input type="text" id="searchName" placeholder="Search by Name">
+<button onclick="searchUser()">SEARCH</button>
+
+<div id="result"></div>
 
 <script>
-const WORKER = "https://secretlyn.yashavanthan22.workers.dev";
-const AUTH   = "Basic " + btoa("IAM:HAMER@6362");
+const API = "https://secretlyn.yashavanthan22.workers.dev";
+
+async function uploadPhoto() {
+  let file = document.getElementById("photo").files[0];
+  if (!file) return null;
+
+  let fd = new FormData();
+  fd.append("photo", file);
+
+  let res = await fetch(API + "/uploadPhoto", {
+    method: "POST",
+    body: fd
+  });
+  let json = await res.json();
+  return json.photo_url;
+}
+
+async function saveUser() {
+  let photo_url = await uploadPhoto();
+
+  let data = {
+    name: document.getElementById("name").value,
+    aadhar: document.getElementById("aadhar").value,
+    phone: document.getElementById("phone").value,
+    pan: document.getElementById("pan").value,
+    dob: document.getElementById("dob").value,
+    address: document.getElementById("address").value,
+    info: document.getElementById("info").value,
+    family: document.getElementById("family").value,
+    photo_url: photo_url
+  };
+
+  await fetch(API + "/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  alert("User Saved Successfully!");
+}
 
 async function searchUser() {
-  const q = query.value;
+  let name = document.getElementById("searchName").value;
+  let res = await fetch(API + "/get?name=" + name);
+  let data = await res.json();
 
-  const url = `${WORKER}/search?name=${q}&aadhar=${q}&phone=${q}`;
+  if (!data.name) {
+    document.getElementById("result").innerHTML = "<p>No user found</p>";
+    return;
+  }
 
-  const res = await fetch(url, { headers: { "Authorization": AUTH }});
-  const data = await res.json();
-
-  sessionStorage.setItem("viewData", JSON.stringify(data));
-  window.location.href = "view.html";
+  document.getElementById("result").innerHTML = `
+    <div class="card">
+      <img src="${data.photo_url}">
+      <p><b>Name:</b> ${data.name}</p>
+      <p><b>Aadhar:</b> ${data.aadhar}</p>
+      <p><b>Phone:</b> ${data.phone}</p>
+      <p><b>PAN:</b> ${data.pan}</p>
+      <p><b>DOB:</b> ${data.dob}</p>
+      <p><b>Address:</b> ${data.address}</p>
+      <p><b>Info:</b> ${data.info}</p>
+      <p><b>Family:</b> ${data.family}</p>
+    </div>
+  `;
 }
 </script>
 
