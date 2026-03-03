@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add User</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>➕ ADD USER</h1>
+
+<div class="container">
+
+  <input id="name" placeholder="Name">
+  <input id="file_id" placeholder="Telegram file_id">
+  <input id="file_path" placeholder="Telegram file_path">
+  <input id="aadhar" placeholder="Aadhar">
+  <input id="phone" placeholder="Phone">
+  <input id="pan" placeholder="PAN">
+  <input id="dob" placeholder="Date of birth">
+  <textarea id="address" placeholder="Address"></textarea>
+  <textarea id="info" placeholder="Extra info"></textarea>
+  <input id="education" placeholder="Education">
+  <textarea id="family" placeholder="Family Details"></textarea>
+
+  <button onclick="saveUser()">SAVE</button>
+
+  <pre id="output"></pre>
+</div>
+
+<script>
+const WORKER = "https://secretlyn.yashavanthan22.workers.dev";
+const AUTH   = "Basic " + btoa("IAM:HAMER@6362");
+
+async function saveUser() {
+
+  const body = {
+    name: name.value,
+    file_id: file_id.value,
+    file_path: file_path.value,
+    aadhar: aadhar.value,
+    phone: phone.value,
+    pan: pan.value,
+    dob: dob.value,
+    address: address.value,
+    info: info.value,
+    education: education.value,
+    family: family.value
+  };
+
+  const res = await fetch(`${WORKER}/save`, {
+    method: "POST",
+    headers: {
+      "Authorization": AUTH,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  output.textContent = JSON.stringify(await res.json(), null, 2);
+}
+</script>
+
+</body>
+</html>
