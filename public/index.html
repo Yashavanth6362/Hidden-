@@ -2,84 +2,195 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>User Database</title>
+<title>User Profile Manager</title>
+
+<!-- Professional Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
-  background: #0a0a0a;
-  color: #00ff99;
-  font-family: monospace;
-  padding: 20px;
+  background: #f5f7fa;
+  font-family: "Inter", sans-serif;
+  padding: 25px;
+  color: #333;
+  max-width: 700px;
+  margin: auto;
 }
+
+/* CARD */
+.card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+}
+
+/* Labels */
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 12px;
+}
+
+/* Inputs */
 input, textarea {
   width: 100%;
-  margin: 5px 0;
-  padding: 8px;
-  background: #111;
-  color: #0f0;
-  border: 1px solid #0f0;
+  padding: 12px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  background: #fff;
+  box-sizing: border-box;
 }
+
 button {
-  padding: 10px;
-  background: #00ff99;
-  border: none;
   width: 100%;
-  margin-top: 10px;
-}
-.card {
-  border: 1px solid #0f0;
-  padding: 10px;
+  padding: 12px;
+  background: #0066ff;
+  color: #fff;
+  border: none;
   margin-top: 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
 }
-img {
-  width: 200px;
-  border: 2px solid #0f0;
+
+button:hover {
+  background: #004dcc;
+}
+
+/* Upload Progress */
+#progressBox {
+  display: none;
+  background: #e9f5ff;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0066ff;
+}
+
+/* Success / Error */
+.success {
+  background: #d1f7d8;
+  color: #148a2e;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.error {
+  background: #ffd5d5;
+  color: #b30000;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+/* Result */
+#result img {
+  width: 140px;
+  border-radius: 10px;
+  margin-bottom: 15px;
 }
 </style>
 </head>
 <body>
 
-<h1>USER DATABASE</h1>
+<h1 style="text-align:center;">User Profile Manager</h1>
 
-<h2>Add / Edit User</h2>
-<input type="file" id="photo">
-<input type="text" id="name" placeholder="Name">
-<input type="text" id="aadhar" placeholder="Aadhar">
-<input type="text" id="phone" placeholder="Phone">
-<input type="text" id="pan" placeholder="PAN">
-<input type="text" id="dob" placeholder="DOB">
-<input type="text" id="address" placeholder="Address">
-<input type="text" id="info" placeholder="Info">
-<input type="text" id="family" placeholder="Family">
+<div class="card">
+  <h2>Add / Edit User</h2>
 
-<button onclick="saveUser()">SAVE USER</button>
+  <label>Upload Photo</label>
+  <input type="file" id="photo">
 
-<hr>
+  <div id="progressBox">Uploading: <span id="progressNum">0%</span></div>
 
-<h2>Search User</h2>
-<input type="text" id="searchName" placeholder="Search by Name">
-<button onclick="searchUser()">SEARCH</button>
+  <label>Name</label>
+  <input type="text" id="name">
 
-<div id="result"></div>
+  <label>Aadhar</label>
+  <input type="text" id="aadhar">
+
+  <label>Phone</label>
+  <input type="text" id="phone">
+
+  <label>PAN</label>
+  <input type="text" id="pan">
+
+  <label>DOB</label>
+  <input type="text" id="dob" placeholder="DD/MM/YYYY">
+
+  <label>Address</label>
+  <input type="text" id="address">
+
+  <label>Info</label>
+  <input type="text" id="info">
+
+  <label>Family</label>
+  <input type="text" id="family">
+
+  <button onclick="saveUser()">Save User</button>
+
+  <div id="msg"></div>
+</div>
+
+<div class="card">
+  <h2>Search User</h2>
+
+  <label>Search by Name</label>
+  <input type="text" id="searchName">
+
+  <button onclick="searchUser()">Search</button>
+
+  <div id="result"></div>
+</div>
 
 <script>
 const API = "https://secretlyn.yashavanthan22.workers.dev";
 
+/********** UPLOAD PHOTO WITH PROGRESS **********/
 async function uploadPhoto() {
-  let file = document.getElementById("photo").files[0];
+  const file = document.getElementById("photo").files[0];
   if (!file) return null;
+
+  document.getElementById("progressBox").style.display = "block";
 
   let fd = new FormData();
   fd.append("photo", file);
 
-  let res = await fetch(API + "/uploadPhoto", {
-    method: "POST",
-    body: fd
-  });
+  // Using fetch normally won’t show percentage.
+  // But we fake progress smoothly (professional UI).
+  let percent = 0;
+  let fake = setInterval(() => {
+    percent += 10;
+    if (percent >= 90) clearInterval(fake);
+    document.getElementById("progressNum").innerText = percent + "%";
+  }, 100);
+
+  let res = await fetch(API + "/uploadPhoto", { method: "POST", body: fd });
   let json = await res.json();
+
+  clearInterval(fake);
+  document.getElementById("progressNum").innerText = "100%";
+
+  setTimeout(() => {
+    document.getElementById("progressBox").style.display = "none";
+  }, 600);
+
   return json.photo_url;
 }
 
+/********** SAVE USER **********/
 async function saveUser() {
+  let msgBox = document.getElementById("msg");
+  msgBox.innerHTML = "";
+
   let photo_url = await uploadPhoto();
 
   let data = {
@@ -100,21 +211,23 @@ async function saveUser() {
     body: JSON.stringify(data)
   });
 
-  alert("User Saved Successfully!");
+  msgBox.innerHTML = `<div class="success">User Saved Successfully ✔</div>`;
 }
 
+/********** SEARCH USER **********/
 async function searchUser() {
   let name = document.getElementById("searchName").value;
   let res = await fetch(API + "/get?name=" + name);
   let data = await res.json();
 
   if (!data.name) {
-    document.getElementById("result").innerHTML = "<p>No user found</p>";
+    document.getElementById("result").innerHTML =
+      `<div class='error'>No user found</div>`;
     return;
   }
 
   document.getElementById("result").innerHTML = `
-    <div class="card">
+    <div class='card'>
       <img src="${data.photo_url}">
       <p><b>Name:</b> ${data.name}</p>
       <p><b>Aadhar:</b> ${data.aadhar}</p>
