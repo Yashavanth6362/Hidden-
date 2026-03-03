@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hacker DB Search</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>⚡ USER SEARCH TERMINAL ⚡</h1>
+
+<div class="container">
+  <input id="query" placeholder="Search by name / aadhar / phone">
+  <button onclick="searchUser()">SEARCH</button>
+</div>
+
+<script>
+const WORKER = "https://secretlyn.yashavanthan22.workers.dev";
+const AUTH   = "Basic " + btoa("IAM:HAMER@6362");
+
+async function searchUser() {
+  const q = query.value;
+
+  const url = `${WORKER}/search?name=${q}&aadhar=${q}&phone=${q}`;
+
+  const res = await fetch(url, { headers: { "Authorization": AUTH }});
+  const data = await res.json();
+
+  sessionStorage.setItem("viewData", JSON.stringify(data));
+  window.location.href = "view.html";
+}
+</script>
+
+</body>
+</html>
