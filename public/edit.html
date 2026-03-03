@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit User</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>✏ EDIT USER</h1>
+
+<div class="container">
+
+  <pre id="old"></pre>
+
+  <input id="phone" placeholder="New phone">
+  <textarea id="address" placeholder="New address"></textarea>
+  <textarea id="info" placeholder="New info"></textarea>
+  <input id="education" placeholder="New education">
+  <textarea id="family" placeholder="New family"></textarea>
+
+  <button onclick="updateUser()">UPDATE</button>
+
+  <pre id="output"></pre>
+
+</div>
+
+<script>
+const WORKER = "https://secretlyn.yashavanthan22.workers.dev";
+const AUTH   = "Basic " + btoa("IAM:HAMER@6362");
+
+const d = JSON.parse(sessionStorage.getItem("editData"));
+
+old.textContent = JSON.stringify(d, null, 2);
+
+async function updateUser() {
+
+  const body = {
+    aadhar: d.aadhar,
+    update: {
+      phone: phone.value || d.phone,
+      address: address.value || d.address,
+      info: info.value || d.info,
+      education: education.value || d.education,
+      family: family.value || d.family
+    }
+  };
+
+  const res = await fetch(`${WORKER}/update`, {
+    method: "POST",
+    headers: {
+      "Authorization": AUTH,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  output.textContent = JSON.stringify(await res.json(), null, 2);
+}
+</script>
+
+</body>
+</html>
