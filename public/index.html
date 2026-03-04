@@ -1,245 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>User Profile Manager</title>
 
-<!-- Professional Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Secret Diary</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-  background: #f5f7fa;
-  font-family: "Inter", sans-serif;
-  padding: 25px;
-  color: #333;
-  max-width: 700px;
-  margin: auto;
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+margin:0;
 }
 
-/* CARD */
-.card {
-  background: #fff;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  margin-bottom: 25px;
+header{
+background:#1e293b;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
 }
 
-/* Labels */
-label {
-  font-weight: 600;
-  display: block;
-  margin-top: 12px;
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
 }
 
-/* Inputs */
-input, textarea {
-  width: 100%;
-  padding: 12px;
-  margin-top: 5px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  background: #fff;
-  box-sizing: border-box;
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  background: #0066ff;
-  color: #fff;
-  border: none;
-  margin-top: 20px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: 600;
+input,textarea{
+width:100%;
+padding:12px;
+border:none;
+border-radius:6px;
+margin-top:10px;
+background:#334155;
+color:white;
 }
 
-button:hover {
-  background: #004dcc;
+button{
+margin-top:12px;
+padding:12px;
+background:#22c55e;
+border:none;
+border-radius:6px;
+color:white;
+font-size:16px;
+cursor:pointer;
 }
 
-/* Upload Progress */
-#progressBox {
-  display: none;
-  background: #e9f5ff;
-  padding: 8px;
-  border-radius: 6px;
-  margin-top: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0066ff;
+.preview{
+margin-top:15px;
 }
 
-/* Success / Error */
-.success {
-  background: #d1f7d8;
-  color: #148a2e;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 15px;
+.preview img{
+width:100%;
+border-radius:10px;
 }
 
-.error {
-  background: #ffd5d5;
-  color: #b30000;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 15px;
+.entry{
+background:#1e293b;
+padding:15px;
+border-radius:8px;
+margin-top:10px;
 }
 
-/* Result */
-#result img {
-  width: 140px;
-  border-radius: 10px;
-  margin-bottom: 15px;
+.entry img{
+width:100%;
+border-radius:8px;
+margin-top:10px;
 }
+
 </style>
+
 </head>
+
 <body>
 
-<h1 style="text-align:center;">User Profile Manager</h1>
+<header>
+My Secret Diary
+</header>
+
+<div class="container">
 
 <div class="card">
-  <h2>Add / Edit User</h2>
 
-  <label>Upload Photo</label>
-  <input type="file" id="photo">
+<h3>New Diary Entry</h3>
 
-  <div id="progressBox">Uploading: <span id="progressNum">0%</span></div>
+<input id="title" placeholder="Title">
 
-  <label>Name</label>
-  <input type="text" id="name">
+<textarea id="text" rows="4" placeholder="Write your memory..."></textarea>
 
-  <label>Aadhar</label>
-  <input type="text" id="aadhar">
+<input type="file" id="photo">
 
-  <label>Phone</label>
-  <input type="text" id="phone">
+<div class="preview" id="preview"></div>
 
-  <label>PAN</label>
-  <input type="text" id="pan">
+<button onclick="saveEntry()">Save Entry</button>
 
-  <label>DOB</label>
-  <input type="text" id="dob" placeholder="DD/MM/YYYY">
-
-  <label>Address</label>
-  <input type="text" id="address">
-
-  <label>Info</label>
-  <input type="text" id="info">
-
-  <label>Family</label>
-  <input type="text" id="family">
-
-  <button onclick="saveUser()">Save User</button>
-
-  <div id="msg"></div>
 </div>
 
 <div class="card">
-  <h2>Search User</h2>
 
-  <label>Search by Name</label>
-  <input type="text" id="searchName">
+<h3>Diary Entries</h3>
 
-  <button onclick="searchUser()">Search</button>
+<div id="entries"></div>
 
-  <div id="result"></div>
+</div>
+
 </div>
 
 <script>
-const API = "https://secretlyn.yashavanthan22.workers.dev";
 
-/********** UPLOAD PHOTO WITH PROGRESS **********/
-async function uploadPhoto() {
-  const file = document.getElementById("photo").files[0];
-  if (!file) return null;
+const API = "https://secretly.yashavanthan22.workers.dev"
 
-  document.getElementById("progressBox").style.display = "block";
+let uploadedImage=""
 
-  let fd = new FormData();
-  fd.append("photo", file);
+document.getElementById("photo").onchange = async e=>{
 
-  // Using fetch normally won’t show percentage.
-  // But we fake progress smoothly (professional UI).
-  let percent = 0;
-  let fake = setInterval(() => {
-    percent += 10;
-    if (percent >= 90) clearInterval(fake);
-    document.getElementById("progressNum").innerText = percent + "%";
-  }, 100);
+const file = e.target.files[0]
 
-  let res = await fetch(API + "/uploadPhoto", { method: "POST", body: fd });
-  let json = await res.json();
+const filename = Date.now()+"_"+file.name
 
-  clearInterval(fake);
-  document.getElementById("progressNum").innerText = "100%";
+const uploadURL =
+"https://06bcb893022e1ad43ce8b7200100d3b3.r2.cloudflarestorage.com/user-photos/"+filename
 
-  setTimeout(() => {
-    document.getElementById("progressBox").style.display = "none";
-  }, 600);
+await fetch(uploadURL,{
+method:"PUT",
+body:file
+})
 
-  return json.photo_url;
+uploadedImage =
+"https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/"+filename
+
+document.getElementById("preview").innerHTML =
+"<img src='"+uploadedImage+"'>"
+
 }
 
-/********** SAVE USER **********/
-async function saveUser() {
-  let msgBox = document.getElementById("msg");
-  msgBox.innerHTML = "";
+async function saveEntry(){
 
-  let photo_url = await uploadPhoto();
+const title = document.getElementById("title").value
+const text = document.getElementById("text").value
 
-  let data = {
-    name: document.getElementById("name").value,
-    aadhar: document.getElementById("aadhar").value,
-    phone: document.getElementById("phone").value,
-    pan: document.getElementById("pan").value,
-    dob: document.getElementById("dob").value,
-    address: document.getElementById("address").value,
-    info: document.getElementById("info").value,
-    family: document.getElementById("family").value,
-    photo_url: photo_url
-  };
+await fetch(API+"/save",{
 
-  await fetch(API + "/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
+method:"POST",
 
-  msgBox.innerHTML = `<div class="success">User Saved Successfully ✔</div>`;
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+title:title,
+text:text,
+image:uploadedImage
+})
+
+})
+
+loadEntries()
+
 }
 
-/********** SEARCH USER **********/
-async function searchUser() {
-  let name = document.getElementById("searchName").value;
-  let res = await fetch(API + "/get?name=" + name);
-  let data = await res.json();
+async function loadEntries(){
 
-  if (!data.name) {
-    document.getElementById("result").innerHTML =
-      `<div class='error'>No user found</div>`;
-    return;
-  }
+const r = await fetch(API+"/list")
+const data = await r.json()
 
-  document.getElementById("result").innerHTML = `
-    <div class='card'>
-      <img src="${data.photo_url}">
-      <p><b>Name:</b> ${data.name}</p>
-      <p><b>Aadhar:</b> ${data.aadhar}</p>
-      <p><b>Phone:</b> ${data.phone}</p>
-      <p><b>PAN:</b> ${data.pan}</p>
-      <p><b>DOB:</b> ${data.dob}</p>
-      <p><b>Address:</b> ${data.address}</p>
-      <p><b>Info:</b> ${data.info}</p>
-      <p><b>Family:</b> ${data.family}</p>
-    </div>
-  `;
+const div = document.getElementById("entries")
+
+div.innerHTML=""
+
+for(let item of data.result){
+
+const r2 = await fetch(API+"/get?id="+item.name.split(":")[1])
+const entry = await r2.json()
+
+div.innerHTML +=
+
+"<div class='entry'>" +
+"<h3>"+entry.title+"</h3>" +
+"<p>"+entry.text+"</p>" +
+(entry.image ? "<img src='"+entry.image+"'>" : "") +
+"</div>"
+
 }
+
+}
+
+loadEntries()
+
 </script>
 
 </body>
