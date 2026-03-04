@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Secret Diary</title>
-
-<style>
+<!DOCTYPE html><html>
+<head><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory Vault</title><style>
 
 body{
-font-family:Arial;
+font-family:system-ui;
 background:#0f172a;
 color:white;
 margin:0;
@@ -15,151 +11,311 @@ margin:0;
 
 header{
 background:#020617;
-padding:15px;
-text-align:center;
+padding:16px;
 font-size:22px;
+text-align:center;
+border-bottom:1px solid #334155;
 }
 
 .container{
-max-width:900px;
+max-width:1000px;
 margin:auto;
 padding:20px;
 }
 
-input,textarea{
-width:100%;
-padding:10px;
-margin-top:10px;
-border:none;
-border-radius:6px;
+.toolbar{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.toolbar input{
+flex:1;
+padding:12px;
 background:#1e293b;
+border:none;
+border-radius:8px;
 color:white;
 }
 
 button{
-margin-top:10px;
-padding:10px;
+padding:12px;
 border:none;
+border-radius:8px;
 background:#22c55e;
 color:white;
-border-radius:6px;
 cursor:pointer;
 }
 
 .card{
 background:#1e293b;
-padding:15px;
-border-radius:10px;
-margin-top:15px;
+border-radius:12px;
+padding:16px;
+margin-bottom:16px;
+position:relative;
 }
 
 .card img{
 width:100%;
-border-radius:8px;
+border-radius:10px;
 margin-top:10px;
 }
 
-</style>
-</head>
-
-<body>
-
-<header>My Secret Diary</header>
-
-<div class="container">
-
-<h3>New Diary Entry</h3>
-
-<input id="title" placeholder="Title">
-
-<textarea id="content" placeholder="Write your memory..."></textarea>
-
-<input type="file" id="image">
-
-<button onclick="saveEntry()">Save Entry</button>
-
-<h3>Diary Entries</h3>
-
-<div id="entries"></div>
-
-</div>
-
-<script>
-
-const API = "https://secretlyn.yashavanthan22.workers.dev"
-
-async function saveEntry(){
-
-const title=document.getElementById("title").value
-const content=document.getElementById("content").value
-const image=document.getElementById("image").files[0]
-
-let imageName=""
-
-if(image){
-
-imageName=Date.now()+"_"+image.name
-
-await fetch("https://api.cloudflare.com/client/v4/accounts/06bcb893022e1ad43ce8b7200100d3b3/r2/buckets/user-photos/objects/"+imageName,{
-method:"PUT",
-headers:{
-Authorization:"Bearer YOUR_API_TOKEN"
-},
-body:image
-})
-
+.tags{
+color:#38bdf8;
+font-size:13px;
+margin-top:6px;
 }
 
-await fetch(API+"/save",{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-title,
-content,
-image:imageName
-})
-})
-
-loadEntries()
-
+.category{
+font-size:12px;
+color:#a1a1aa;
+margin-top:4px;
 }
 
-async function loadEntries(){
+.menu{
+position:absolute;
+right:10px;
+top:10px;
+cursor:pointer;
+}
+
+.dropdown{
+display:none;
+position:absolute;
+right:10px;
+top:30px;
+background:#334155;
+border-radius:6px;
+}
+
+.dropdown div{
+padding:8px 12px;
+cursor:pointer;
+}
+
+.dropdown div:hover{
+background:#475569;
+}
+
+.gallery{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+}
+
+.gallery img{
+width:100%;
+border-radius:8px;
+}
+
+.timeline{
+border-left:2px solid #334155;
+padding-left:20px;
+}
+
+.entry-date{
+color:#38bdf8;
+font-size:13px;
+margin-bottom:6px;
+}
+
+</style></head><body><header>Memory Vault</header><div class="container"><div class="toolbar"><input id="search" placeholder="Search memories or #tags"><button onclick="newEntry()">New</button>
+
+<button onclick="showGallery()">Gallery</button>
+
+<button onclick="showTimeline()">Timeline</button>
+
+</div><div id="entries"></div></div><script>
+
+const API="https://secretly.yashavanthan22.workers.dev"
+
+let entries=[]
+
+async function load(){
 
 const res=await fetch(API+"/list")
 const data=await res.json()
 
-const box=document.getElementById("entries")
-box.innerHTML=""
+entries=[]
 
-for(let item of data.result){
+for(let k of data.result){
 
-const id=item.name.replace("diary:","")
+const id=k.name.replace("diary:","")
 
 const r=await fetch(API+"/get?id="+id)
 const d=await r.json()
 
+d.id=id
+
+entries.push(d)
+
+}
+
+render(entries)
+
+}
+
+function render(list){
+
+const box=document.getElementById("entries")
+box.innerHTML=""
+
+for(let e of list){
+
 let img=""
 
-if(d.image){
-img=`<img src="https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/${d.image}">`
+if(e.image){
+img=`<img src="https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/${e.image}">`
 }
 
 box.innerHTML+=`
+
 <div class="card">
-<h4>${d.title}</h4>
-<p>${d.content}</p>
-${img}
+
+<div class="menu" onclick="toggleMenu('${e.id}')">⋮</div>
+
+<div class="dropdown" id="menu-${e.id}">
+<div onclick="editEntry('${e.id}')">Edit</div>
+<div onclick="deleteEntry('${e.id}')">Delete</div>
 </div>
+
+<h3>${e.title || ""}</h3>
+
+<p>${e.content || ""}</p>
+
+<div class="tags">${extractTags(e.content)}</div>
+
+<div class="category">${e.category || ""}</div>
+
+${img}
+
+</div>
+
 `
 
 }
 
 }
 
-loadEntries()
+function toggleMenu(id){
 
-</script>
+const m=document.getElementById("menu-"+id)
 
-</body>
+m.style.display=m.style.display==="block"?"none":"block"
+
+}
+
+function extractTags(text){
+
+const tags=text.match(/#\w+/g)
+
+return tags?tags.join(" "):""
+
+}
+
+async function deleteEntry(id){
+
+await fetch(API+"/delete?id="+id)
+
+load()
+
+}
+
+function search(){
+
+const q=document.getElementById("search").value.toLowerCase()
+
+const filtered=entries.filter(e=>
+
+JSON.stringify(e).toLowerCase().includes(q)
+)
+
+render(filtered)
+
+}
+
+document.getElementById("search").onkeyup=search
+
+function showGallery(){
+
+const box=document.getElementById("entries")
+
+box.innerHTML='<div class="gallery"></div>'
+
+const g=box.firstChild
+
+for(let e of entries){
+
+if(e.image){
+
+g.innerHTML+=`<img src="https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/${e.image}">`
+
+}
+
+}
+
+}
+
+function showTimeline(){
+
+const box=document.getElementById("entries")
+
+box.innerHTML='<div class="timeline"></div>'
+
+const t=box.firstChild
+
+entries.sort((a,b)=>new Date(b.time)-new Date(a.time))
+
+for(let e of entries){
+
+t.innerHTML+=`
+
+<div>
+
+<div class="entry-date">${new Date(e.time).toDateString()}</div>
+
+<div class="card">
+
+<h3>${e.title}</h3>
+
+<p>${e.content}</p>
+
+</div>
+
+</div>
+
+`
+
+}
+
+}
+
+function newEntry(){
+
+const title=prompt("Title")
+
+const content=prompt("Write memory")
+
+fetch(API+"/save",{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({
+
+title,
+
+content
+
+})
+
+}).then(load)
+
+}
+
+load()
+
+</script></body>
 </html>
