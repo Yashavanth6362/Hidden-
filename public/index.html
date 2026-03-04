@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<title>Secret Diary</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Secret Diary</title>
 
 <style>
 
@@ -16,11 +14,10 @@ margin:0;
 }
 
 header{
-background:#1e293b;
+background:#020617;
 padding:15px;
 text-align:center;
 font-size:22px;
-font-weight:bold;
 }
 
 .container{
@@ -29,85 +26,57 @@ margin:auto;
 padding:20px;
 }
 
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-margin-bottom:20px;
-}
-
 input,textarea{
 width:100%;
-padding:12px;
+padding:10px;
+margin-top:10px;
 border:none;
 border-radius:6px;
-margin-top:10px;
-background:#334155;
+background:#1e293b;
 color:white;
 }
 
 button{
-margin-top:12px;
-padding:12px;
-background:#22c55e;
+margin-top:10px;
+padding:10px;
 border:none;
-border-radius:6px;
+background:#22c55e;
 color:white;
-font-size:16px;
+border-radius:6px;
 cursor:pointer;
 }
 
-.preview{
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
 margin-top:15px;
 }
 
-.preview img{
-width:100%;
-border-radius:10px;
-}
-
-.entry{
-background:#1e293b;
-padding:15px;
-border-radius:8px;
-margin-top:10px;
-}
-
-.entry img{
+.card img{
 width:100%;
 border-radius:8px;
 margin-top:10px;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<header>
-My Secret Diary
-</header>
+<header>My Secret Diary</header>
 
 <div class="container">
-
-<div class="card">
 
 <h3>New Diary Entry</h3>
 
 <input id="title" placeholder="Title">
 
-<textarea id="text" rows="4" placeholder="Write your memory..."></textarea>
+<textarea id="content" placeholder="Write your memory..."></textarea>
 
-<input type="file" id="photo">
-
-<div class="preview" id="preview"></div>
+<input type="file" id="image">
 
 <button onclick="saveEntry()">Save Entry</button>
-
-</div>
-
-<div class="card">
 
 <h3>Diary Entries</h3>
 
@@ -115,55 +84,40 @@ My Secret Diary
 
 </div>
 
-</div>
-
 <script>
 
-const API = "https://secretly.yashavanthan22.workers.dev"
-
-let uploadedImage=""
-
-document.getElementById("photo").onchange = async e=>{
-
-const file = e.target.files[0]
-
-const filename = Date.now()+"_"+file.name
-
-const uploadURL =
-"https://06bcb893022e1ad43ce8b7200100d3b3.r2.cloudflarestorage.com/user-photos/"+filename
-
-await fetch(uploadURL,{
-method:"PUT",
-body:file
-})
-
-uploadedImage =
-"https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/"+filename
-
-document.getElementById("preview").innerHTML =
-"<img src='"+uploadedImage+"'>"
-
-}
+const API = "https://secretlyn.yashavanthan22.workers.dev"
 
 async function saveEntry(){
 
-const title = document.getElementById("title").value
-const text = document.getElementById("text").value
+const title=document.getElementById("title").value
+const content=document.getElementById("content").value
+const image=document.getElementById("image").files[0]
 
-await fetch(API+"/save",{
+let imageName=""
 
-method:"POST",
+if(image){
 
+imageName=Date.now()+"_"+image.name
+
+await fetch("https://api.cloudflare.com/client/v4/accounts/06bcb893022e1ad43ce8b7200100d3b3/r2/buckets/user-photos/objects/"+imageName,{
+method:"PUT",
 headers:{
-"Content-Type":"application/json"
+Authorization:"Bearer YOUR_API_TOKEN"
 },
-
-body:JSON.stringify({
-title:title,
-text:text,
-image:uploadedImage
+body:image
 })
 
+}
+
+await fetch(API+"/save",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+title,
+content,
+image:imageName
+})
 })
 
 loadEntries()
@@ -172,25 +126,32 @@ loadEntries()
 
 async function loadEntries(){
 
-const r = await fetch(API+"/list")
-const data = await r.json()
+const res=await fetch(API+"/list")
+const data=await res.json()
 
-const div = document.getElementById("entries")
-
-div.innerHTML=""
+const box=document.getElementById("entries")
+box.innerHTML=""
 
 for(let item of data.result){
 
-const r2 = await fetch(API+"/get?id="+item.name.split(":")[1])
-const entry = await r2.json()
+const id=item.name.replace("diary:","")
 
-div.innerHTML +=
+const r=await fetch(API+"/get?id="+id)
+const d=await r.json()
 
-"<div class='entry'>" +
-"<h3>"+entry.title+"</h3>" +
-"<p>"+entry.text+"</p>" +
-(entry.image ? "<img src='"+entry.image+"'>" : "") +
-"</div>"
+let img=""
+
+if(d.image){
+img=`<img src="https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/${d.image}">`
+}
+
+box.innerHTML+=`
+<div class="card">
+<h4>${d.title}</h4>
+<p>${d.content}</p>
+${img}
+</div>
+`
 
 }
 
