@@ -1,178 +1,1078 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Vault · encrypted diary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Memory Vault</title>
+        body {
+            background: #0a0c10;
+            color: #e4e6eb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-<style>
+        /* glassmorphic vault aesthetic */
+        .vault-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, #1a2a3a, #0b0e14);
+            z-index: -2;
+        }
 
-body{
-font-family:system-ui;
-background:#020617;
-color:white;
-margin:0;
-}
+        .vault-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path d="M20 20 L80 20 L80 80 L20 80 Z" stroke="%23aaccff" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="15" stroke="%23aaccff" stroke-width="0.5" fill="none"/></svg>') repeat;
+            pointer-events: none;
+        }
 
-header{
-padding:18px;
-text-align:center;
-font-size:22px;
-border-bottom:1px solid #334155;
-}
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
 
-.container{
-max-width:900px;
-margin:auto;
-padding:20px;
-}
+        /* header with vault status */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(18, 25, 35, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 150, 255, 0.15);
+            border-radius: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
 
-.card{
-background:#1e293b;
-padding:15px;
-border-radius:10px;
-margin-bottom:15px;
-}
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
 
-input,textarea,select{
-width:100%;
-margin-top:8px;
-padding:10px;
-border:none;
-border-radius:6px;
-background:#334155;
-color:white;
-}
+        .logo i {
+            font-size: 24px;
+            color: #70b0ff;
+            filter: drop-shadow(0 0 8px #3f6eff55);
+        }
 
-button{
-margin-top:10px;
-padding:10px;
-background:#22c55e;
-border:none;
-border-radius:6px;
-color:white;
-}
+        .vault-badge {
+            background: #1e2a3a;
+            padding: 8px 16px;
+            border-radius: 100px;
+            border-left: 3px solid #50c878;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #b0d0ff;
+        }
 
-.card img{
-width:100%;
-margin-top:10px;
-border-radius:8px;
-}
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #50c878;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #50c878;
+        }
 
-</style>
+        /* navigation tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            padding: 8px;
+            background: rgba(12, 20, 28, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            border: 1px solid #2a3a4a;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border-radius: 40px;
+            background: transparent;
+            border: none;
+            color: #9aaec9;
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab i {
+            font-size: 18px;
+        }
+
+        .tab:hover {
+            background: rgba(60, 100, 200, 0.15);
+            color: white;
+        }
+
+        .tab.active {
+            background: #2b3f5c;
+            color: white;
+            box-shadow: 0 4px 12px #1e3a5f;
+        }
+
+        /* main grid layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        /* left panel - calendar & heatmap & tags */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(20, 28, 40, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid #2f4055;
+            border-radius: 32px;
+            padding: 24px 20px;
+            box-shadow: 0 18px 40px -10px black;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b0c8ff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* calendar */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-month {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.02);
+            cursor: pointer;
+            transition: 0.1s;
+            font-weight: 400;
+        }
+
+        .calendar-day.has-entry {
+            background: #2b4f8e;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 0 10px #3f7fff;
+        }
+
+        .calendar-day.today {
+            border: 2px solid #70b0ff;
+        }
+
+        .calendar-day:hover {
+            background: #3a506e;
+        }
+
+        /* heatmap */
+        .heatmap-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .heatmap-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .heatmap-cell {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: #19232e;
+            transition: 0.1s;
+        }
+
+        .heatmap-cell[data-level="1"] { background: #1e3a5f; }
+        .heatmap-cell[data-level="2"] { background: #2b4f8e; }
+        .heatmap-cell[data-level="3"] { background: #3f7fff; }
+        .heatmap-cell[data-level="4"] { background: #70b0ff; box-shadow: 0 0 10px #3f7fff; }
+
+        /* tags cloud */
+        .tags-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag-item {
+            background: #1e2e42;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            border: 1px solid #3f5a7a;
+            cursor: pointer;
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag-item.active {
+            background: #3f7fff;
+            border-color: #aac9ff;
+        }
+
+        .tag-item .count {
+            background: #00000033;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+
+        /* right panel - entries & gallery */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            background: rgba(10, 18, 28, 0.7);
+            border-radius: 60px;
+            padding: 6px 6px 6px 24px;
+            border: 1px solid #2e4258;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 15px;
+            padding: 12px 0;
+            outline: none;
+        }
+
+        .search-bar button {
+            background: #2b4058;
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .search-bar button:hover {
+            background: #3f5f80;
+        }
+
+        /* entry form */
+        .entry-form {
+            background: rgba(25, 35, 50, 0.8);
+            border-radius: 40px;
+            padding: 28px;
+            border: 1px solid #3e5770;
+        }
+
+        .form-row {
+            margin-bottom: 18px;
+        }
+
+        .form-row input, .form-row textarea, .form-row select {
+            width: 100%;
+            background: #1e2b3b;
+            border: 1px solid #3d556d;
+            border-radius: 24px;
+            padding: 16px 22px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: 0.1s;
+        }
+
+        .form-row textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .form-row input:focus, .form-row textarea:focus {
+            border-color: #70b0ff;
+            box-shadow: 0 0 0 2px #1e4f8e;
+        }
+
+        .tag-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag-option {
+            background: #1e2e42;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #3f5a7a;
+            user-select: none;
+        }
+
+        .tag-option.selected {
+            background: #3f7fff;
+            border-color: white;
+        }
+
+        .file-upload {
+            border: 2px dashed #3f5a7a;
+            border-radius: 30px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .file-upload:hover {
+            border-color: #70b0ff;
+            background: #1b2a3f;
+        }
+
+        .btn-primary {
+            background: #2f5a9c;
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.1s;
+            box-shadow: 0 4px 20px #1f3f6e;
+        }
+
+        .btn-primary:hover {
+            background: #3f6fc9;
+        }
+
+        /* entries timeline */
+        .entries-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .entry-card {
+            background: rgba(28, 38, 52, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 22px;
+            border-left: 6px solid #3f7fff;
+            border: 1px solid #2e4560;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+
+        .entry-card:hover {
+            background: #223449;
+            border-color: #70b0ff;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .entry-date {
+            color: #b0d0ff;
+            font-size: 14px;
+        }
+
+        .entry-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .entry-tag {
+            background: #1e3a5f;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+
+        .entry-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .entry-preview {
+            color: #a0b8d0;
+            font-size: 15px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .entry-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .entry-thumb {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            object-fit: cover;
+            background: #1f3143;
+        }
+
+        .entry-footer {
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+        }
+
+        .entry-footer button {
+            background: transparent;
+            border: none;
+            color: #b0c8ff;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 30px;
+        }
+
+        .entry-footer button:hover {
+            background: #1e3f60;
+            color: white;
+        }
+
+        /* gallery grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            border-radius: 24px;
+            background: #1a2b3c;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #3a5770;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* modal for secret view */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1f2a38;
+            border-radius: 48px;
+            max-width: 600px;
+            width: 90%;
+            padding: 36px;
+            border: 1px solid #5f8ad0;
+            box-shadow: 0 30px 60px #00000080;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #9ab0d0;
+        }
+
+        .secret-doc {
+            background: #0f1a24;
+            border-radius: 32px;
+            padding: 30px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid gold;
+            box-shadow: 0 0 30px #ffd96655;
+            position: relative;
+        }
+
+        .secret-doc::before {
+            content: '🔒 SECRET DOCUMENT';
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            background: #0f1a24;
+            padding: 0 15px;
+            color: #ffd966;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+    </style>
+    <!-- font awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-
 <body>
+    <div class="vault-bg"></div>
+    <div class="container">
+        <!-- header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-lock"></i>
+                <span>SECRET VAULT · encrypted diary</span>
+            </div>
+            <div class="vault-badge">
+                <span class="status-dot"></span>
+                <span>VAULT CONNECTED · AES-256</span>
+                <i class="fas fa-shield-alt"></i>
+            </div>
+        </div>
 
-<header>Memory Vault</header>
+        <!-- tabs navigation -->
+        <div class="tabs" id="tabContainer">
+            <button class="tab active" data-tab="timeline"><i class="fas fa-stream"></i> Timeline</button>
+            <button class="tab" data-tab="gallery"><i class="fas fa-images"></i> Gallery</button>
+            <button class="tab" data-tab="calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
+            <button class="tab" data-tab="tags"><i class="fas fa-tags"></i> Tags</button>
+            <button class="tab" data-tab="search"><i class="fas fa-search"></i> Search</button>
+            <button class="tab" data-tab="secret"><i class="fas fa-file-secret"></i> Secret Doc</button>
+        </div>
 
-<div class="container">
+        <!-- main dashboard -->
+        <div class="dashboard">
+            <!-- LEFT PANEL: calendar heatmap + tags (always visible but collapsible) -->
+            <div class="left-panel">
+                <!-- calendar card -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-calendar"></i> TIME CAPSULE</div>
+                    <div class="calendar-header">
+                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                        <span class="calendar-month" id="currentMonth">March 2026</span>
+                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- JS will fill -->
+                    </div>
+                </div>
 
-<h3>New Entry</h3>
+                <!-- heatmap card -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-fire"></i> ENTRY HEATMAP</div>
+                    <div class="heatmap-grid" id="heatmapContainer"></div>
+                </div>
 
-<input id="title" placeholder="Title">
+                <!-- tags card -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-hashtag"></i> TOP TAGS</div>
+                    <div class="tags-cloud" id="tagsCloud">
+                        <!-- dynamic from entries -->
+                    </div>
+                </div>
+            </div>
 
-<textarea id="content" placeholder="Write memory #tags"></textarea>
+            <!-- RIGHT PANEL: dynamic content based on active tab -->
+            <div class="right-panel">
+                <!-- search bar always visible -->
+                <div class="search-bar">
+                    <i class="fas fa-search" style="color: #6080b0;"></i>
+                    <input type="text" placeholder="Search memories, tags, or date..." id="searchInput">
+                    <button id="searchBtn">Search</button>
+                </div>
 
-<select id="category">
-<option>Love</option>
-<option>Ideas</option>
-<option>Fake People</option>
-<option>Secrets</option>
-<option>Documents</option>
-</select>
+                <!-- NEW ENTRY FORM (always visible) -->
+                <div class="entry-form" id="entryForm">
+                    <div class="form-row">
+                        <input type="text" placeholder="Title / idea" id="entryTitle">
+                    </div>
+                    <div class="form-row">
+                        <textarea placeholder="Write your secret entry... (supports #tags)" id="entryContent"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <select id="entryCategory">
+                            <option value="personal">💭 Personal</option>
+                            <option value="ideas">💡 Ideas</option>
+                            <option value="work">📁 Work</option>
+                            <option value="travel">✈️ Travel</option>
+                            <option value="secret">🔒 Secret</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="tag-selector" id="inlineTagSelector">
+                            <span class="tag-option" data-tag="ideas">#ideas</span>
+                            <span class="tag-option" data-tag="dreams">#dreams</span>
+                            <span class="tag-option" data-tag="poetry">#poetry</span>
+                            <span class="tag-option" data-tag="project">#project</span>
+                            <span class="tag-option" data-tag="memory">#memory</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="file-upload" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 32px; margin-bottom: 10px;"></i>
+                            <p>Drag photos or click to upload (stored in R2)</p>
+                            <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                        </div>
+                        <div id="uploadPreview" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;"></div>
+                    </div>
+                    <button class="btn-primary" id="saveEntryBtn"><i class="fas fa-lock"></i> ENCRYPT & SAVE TO VAULT</button>
+                </div>
 
-<input type="file" id="image">
+                <!-- entries timeline (shown by default) -->
+                <div id="timelineView" style="display: block;">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-history"></i> RECENT ENTRIES</h3>
+                    <div class="entries-timeline" id="entriesList">
+                        <!-- dynamic from kv -->
+                    </div>
+                </div>
 
-<button onclick="save()">Save Entry</button>
+                <!-- gallery view (hidden) -->
+                <div id="galleryView" style="display: none;">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> IMAGE GALLERY (R2)</h3>
+                    <div class="gallery-grid" id="galleryGrid"></div>
+                </div>
 
-<h3>Diary Entries</h3>
+                <!-- search results view (hidden) -->
+                <div id="searchView" style="display: none;">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-search"></i> SEARCH RESULTS</h3>
+                    <div class="entries-timeline" id="searchResults"></div>
+                </div>
 
-<div id="entries"></div>
+                <!-- secret document view (hidden) -->
+                <div id="secretView" style="display: none;">
+                    <div class="secret-doc">
+                        <h2 style="color: #ffd966; margin-bottom: 20px;">📜 ULTRA SECRET</h2>
+                        <p style="margin-bottom: 20px;">This document is client-side encrypted. Only you can read it.</p>
+                        <textarea id="secretText" placeholder="Write your most private thoughts..." style="width:100%; background:#09131c; border:1px solid #576b83; border-radius:20px; padding:20px; color:white; min-height:150px;"></textarea>
+                        <button class="btn-primary" id="saveSecretBtn" style="margin-top:20px;"><i class="fas fa-lock"></i> SAVE SECRET (local encrypted)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</div>
+    <!-- modal for full entry -->
+    <div class="modal" id="entryModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div id="modalEntryContent"></div>
+        </div>
+    </div>
 
-<script>
+    <script>
+        // ----------------- CONFIG -----------------
+        const API_BASE = 'https://secretly.yashavanthan22.workers.dev'; // your worker
+        let allEntries = [];
+        let currentTagFilter = null;
 
-const API="https://secretly.yashavanthan22.workers.dev"
+        // ---------- HELPER: fetch entries (list only) ----------
+        async function loadEntries() {
+            try {
+                const resp = await fetch(`${API_BASE}/list`);
+                const keys = await resp.json();  // {result: [{name: "diary:123", metadata: ...}]}
+                if (!keys.result) return;
+                
+                const entries = [];
+                for (const k of keys.result) {
+                    const id = k.name.replace('diary:', '');
+                    const entryResp = await fetch(`${API_BASE}/get?id=${id}`);
+                    if (entryResp.ok) {
+                        const data = await entryResp.json();
+                        entries.push({ id, ...data });
+                    }
+                }
+                // sort by date descending (timestamp from id)
+                entries.sort((a,b) => b.id - a.id);
+                allEntries = entries;
+                renderTimeline();
+                renderTags();
+                renderHeatmap();
+                renderCalendar();
+                renderGallery();
+            } catch (e) {
+                console.error('load error', e);
+            }
+        }
 
-async function save(){
+        // ---------- RENDER TIMELINE ----------
+        function renderTimeline(filterTag = currentTagFilter) {
+            let filtered = allEntries;
+            if (filterTag) {
+                filtered = allEntries.filter(e => e.tags && e.tags.includes(filterTag));
+            }
+            const container = document.getElementById('entriesList');
+            container.innerHTML = filtered.map(e => `
+                <div class="entry-card" data-id="${e.id}">
+                    <div class="entry-header">
+                        <span class="entry-date">${new Date(parseInt(e.id)).toLocaleString()}</span>
+                        <div class="entry-tags">${(e.tags || []).map(t => `<span class="entry-tag">#${t}</span>`).join('')}</div>
+                    </div>
+                    <div class="entry-title">${e.title || 'untitled'}</div>
+                    <div class="entry-preview">${(e.content || '').substring(0, 100)}...</div>
+                    ${e.images ? `<div class="entry-images">${e.images.map(img => `<img src="${img}" class="entry-thumb">`).join('')}</div>` : ''}
+                    <div class="entry-footer">
+                        <button class="edit-entry" data-id="${e.id}"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="delete-entry" data-id="${e.id}"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // attach click to view full (except buttons)
+            document.querySelectorAll('.entry-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('button')) return;
+                    const id = card.dataset.id;
+                    const entry = allEntries.find(en => en.id == id);
+                    showModal(entry);
+                });
+            });
+            // attach edit/delete
+            document.querySelectorAll('.edit-entry').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    const entry = allEntries.find(en => en.id == id);
+                    populateForm(entry);
+                });
+            });
+            document.querySelectorAll('.delete-entry').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete this entry?')) {
+                        const id = btn.dataset.id;
+                        await fetch(`${API_BASE}/delete?id=${id}`, { method: 'DELETE' });
+                        await loadEntries();
+                    }
+                });
+            });
+        }
 
-const title=document.getElementById("title").value
-const content=document.getElementById("content").value
-const category=document.getElementById("category").value
-const file=document.getElementById("image").files[0]
+        function showModal(entry) {
+            const div = document.getElementById('modalEntryContent');
+            div.innerHTML = `
+                <h2 style="margin-bottom: 20px;">${entry.title}</h2>
+                <p style="color:#ccc; margin-bottom:20px;">${new Date(parseInt(entry.id)).toLocaleString()}</p>
+                <p style="line-height:1.6; white-space:pre-wrap;">${entry.content}</p>
+                ${entry.images ? `<div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;">${entry.images.map(img => `<img src="${img}" style="max-width:200px; border-radius:20px;">`).join('')}</div>` : ''}
+            `;
+            document.getElementById('entryModal').style.display = 'flex';
+        }
 
-let image=""
+        function populateForm(entry) {
+            document.getElementById('entryTitle').value = entry.title || '';
+            document.getElementById('entryContent').value = entry.content || '';
+            document.getElementById('entryCategory').value = entry.category || 'personal';
+            // tags: highlight selector
+            document.querySelectorAll('.tag-option').forEach(opt => {
+                if (entry.tags && entry.tags.includes(opt.dataset.tag)) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+            // TODO: handle images edit ...
+        }
 
-if(file){
+        // ---------- RENDER TAGS CLOUD ----------
+        function renderTags() {
+            const tagCount = {};
+            allEntries.forEach(e => {
+                if (e.tags) {
+                    e.tags.forEach(t => tagCount[t] = (tagCount[t] || 0) + 1);
+                }
+            });
+            const cloud = document.getElementById('tagsCloud');
+            cloud.innerHTML = Object.entries(tagCount).map(([tag, cnt]) => `
+                <span class="tag-item ${currentTagFilter === tag ? 'active' : ''}" data-tag="${tag}">
+                    #${tag} <span class="count">${cnt}</span>
+                </span>
+            `).join('');
+            document.querySelectorAll('.tag-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const tag = el.dataset.tag;
+                    currentTagFilter = currentTagFilter === tag ? null : tag;
+                    renderTags();  // re-render active state
+                    renderTimeline(currentTagFilter);
+                });
+            });
+        }
 
-const form=new FormData()
-form.append("file",file)
+        // ---------- RENDER HEATMAP (mock) ----------
+        function renderHeatmap() {
+            const container = document.getElementById('heatmapContainer');
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                html += '<div class="heatmap-row">';
+                for (let j = 0; j < 12; j++) {
+                    const level = Math.floor(Math.random() * 5); // replace with real data later
+                    html += `<div class="heatmap-cell" data-level="${level}"></div>`;
+                }
+                html += '</div>';
+            }
+            container.innerHTML = html;
+        }
 
-const r=await fetch(API+"/upload",{
-method:"POST",
-body:form
-})
+        // ---------- RENDER CALENDAR (current month) ----------
+        let currentDate = new Date();
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            document.getElementById('currentMonth').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            let gridHtml = 'S M T W T F S'.split(' ').map(d => `<span style="color:#7f9fbf;">${d}</span>`).join('');
+            for (let i = 0; i < firstDay; i++) gridHtml += '<span></span>';
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasEntry = allEntries.some(e => new Date(parseInt(e.id)).toDateString() === new Date(year, month, d).toDateString());
+                const today = new Date().toDateString() === new Date(year, month, d).toDateString();
+                gridHtml += `<span class="calendar-day ${hasEntry ? 'has-entry' : ''} ${today ? 'today' : ''}">${d}</span>`;
+            }
+            document.getElementById('calendarGrid').innerHTML = gridHtml;
+        }
 
-const d=await r.json()
+        // ---------- RENDER GALLERY ----------
+        function renderGallery() {
+            const allImages = allEntries.flatMap(e => e.images || []);
+            const gallery = document.getElementById('galleryGrid');
+            gallery.innerHTML = allImages.map(url => `
+                <div class="gallery-item"><img src="${url}" loading="lazy"></div>
+            `).join('');
+        }
 
-image=d.file
+        // ---------- SAVE ENTRY ----------
+        document.getElementById('saveEntryBtn').addEventListener('click', async () => {
+            const title = document.getElementById('entryTitle').value;
+            const content = document.getElementById('entryContent').value;
+            const category = document.getElementById('entryCategory').value;
+            const selectedTags = Array.from(document.querySelectorAll('.tag-option.selected')).map(el => el.dataset.tag);
+            
+            // upload images first (to R2) - simplified: only first file for demo
+            const fileInput = document.getElementById('fileInput');
+            let imageUrls = [];
+            if (fileInput.files.length > 0) {
+                for (let file of fileInput.files) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const uploadResp = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+                    const uploadJson = await uploadResp.json();
+                    if (uploadJson.url) imageUrls.push(uploadJson.url);
+                }
+            }
 
-}
+            const entryData = {
+                title, content, category,
+                tags: selectedTags,
+                images: imageUrls,
+                updated: Date.now()
+            };
 
-await fetch(API+"/save",{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-title,
-content,
-category,
-image,
-time:Date.now()
-})
-})
+            const resp = await fetch(`${API_BASE}/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entryData)
+            });
+            if (resp.ok) {
+                // clear form
+                document.getElementById('entryTitle').value = '';
+                document.getElementById('entryContent').value = '';
+                document.getElementById('fileInput').value = '';
+                document.getElementById('uploadPreview').innerHTML = '';
+                await loadEntries();
+            }
+        });
 
-load()
+        // ---------- TAG SELECTOR ----------
+        document.querySelectorAll('.tag-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                opt.classList.toggle('selected');
+            });
+        });
 
-}
+        // ---------- FILE UPLOAD PREVIEW ----------
+        document.getElementById('fileUploadArea').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const preview = document.getElementById('uploadPreview');
+            preview.innerHTML = '';
+            for (let file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.style.width = '70px'; img.style.height = '70px'; img.style.borderRadius = '16px'; img.style.objectFit = 'cover';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-async function load(){
+        // ---------- TABS ----------
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const which = tab.dataset.tab;
+                document.getElementById('timelineView').style.display = which === 'timeline' ? 'block' : 'none';
+                document.getElementById('galleryView').style.display = which === 'gallery' ? 'block' : 'none';
+                document.getElementById('searchView').style.display = which === 'search' ? 'block' : 'none';
+                document.getElementById('secretView').style.display = which === 'secret' ? 'block' : 'none';
+                if (which === 'gallery') renderGallery();
+            });
+        });
 
-const res=await fetch(API+"/list")
-const data=await res.json()
+        // ---------- SEARCH ----------
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const results = allEntries.filter(e => 
+                (e.title && e.title.toLowerCase().includes(term)) || 
+                (e.content && e.content.toLowerCase().includes(term)) ||
+                (e.tags && e.tags.some(t => t.includes(term)))
+            );
+            const container = document.getElementById('searchResults');
+            container.innerHTML = results.map(e => `
+                <div class="entry-card">
+                    <div class="entry-header"><span class="entry-date">${new Date(parseInt(e.id)).toLocaleString()}</span></div>
+                    <div class="entry-title">${e.title}</div>
+                    <div class="entry-preview">${(e.content || '').substring(0,100)}...</div>
+                </div>
+            `).join('');
+            // switch to search tab
+            document.querySelector('[data-tab="search"]').click();
+        });
 
-const box=document.getElementById("entries")
-box.innerHTML=""
+        // ---------- SECRET DOC (localStorage mock, client-side encrypted) ----------
+        document.getElementById('saveSecretBtn').addEventListener('click', () => {
+            const text = document.getElementById('secretText').value;
+            // simple mock encryption (base64) – replace with actual AES if needed
+            const encrypted = btoa(text); // not secure, just demonstration
+            localStorage.setItem('secretDoc', encrypted);
+            alert('Secret saved locally (encrypted in localStorage)');
+        });
+        // load secret
+        const saved = localStorage.getItem('secretDoc');
+        if (saved) {
+            try {
+                document.getElementById('secretText').value = atob(saved);
+            } catch { }
+        }
 
-for(let item of data.result){
+        // ---------- MODAL CLOSE ----------
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('entryModal').style.display = 'none';
+        });
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('entryModal')) {
+                document.getElementById('entryModal').style.display = 'none';
+            }
+        });
 
-const id=item.name.replace("diary:","")
+        // ---------- CALENDAR NAV ----------
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
 
-const r=await fetch(API+"/get?id="+id)
-const d=await r.json()
+        // ---------- INITIAL LOAD ----------
+        loadEntries();
+        renderCalendar();
 
-let img=""
-
-if(d.image){
-img=`<img src="https://pub-c91284acac5e4383a69c7cfd585ae61.r2.dev/${d.image}">`
-}
-
-box.innerHTML+=`
-<div class="card">
-<h3>${d.title}</h3>
-<p>${d.content}</p>
-${img}
-</div>
-`
-
-}
-
-}
-
-load()
-
-</script>
-
+        // Poll for updates every 30s (optional)
+        setInterval(loadEntries, 30000);
+    </script>
 </body>
 </html>
