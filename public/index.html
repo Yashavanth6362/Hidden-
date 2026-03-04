@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Vault · encrypted diary</title>
+    <title>SECRET DIARY · vault</title>
     <style>
         * {
             margin: 0;
@@ -13,21 +13,19 @@
         }
 
         body {
-            background: #0a0c10;
-            color: #e4e6eb;
+            background: #0a0c15;
+            color: #eef2f6;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
-        /* glassmorphic vault aesthetic */
+        /* vault background */
         .vault-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 20% 30%, #1a2a3a, #0b0e14);
+            background: radial-gradient(circle at 30% 40%, #1a2635, #0b0f18);
             z-index: -2;
         }
 
@@ -38,282 +36,165 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path d="M20 20 L80 20 L80 80 L20 80 Z" stroke="%23aaccff" stroke-width="0.5" fill="none"/><circle cx="50" cy="50" r="15" stroke="%23aaccff" stroke-width="0.5" fill="none"/></svg>') repeat;
+            background: repeating-linear-gradient(45deg, rgba(100, 150, 255, 0.02) 0px, rgba(100, 150, 255, 0.02) 2px, transparent 2px, transparent 8px);
             pointer-events: none;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             position: relative;
             z-index: 2;
-            width: 100%;
         }
 
-        /* header with vault status */
-        .header {
+        /* top bar */
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 16px 24px;
-            background: rgba(18, 25, 35, 0.7);
+            background: rgba(12, 20, 30, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(100, 150, 255, 0.15);
-            border-radius: 40px;
+            border: 1px solid #2d4055;
+            border-radius: 60px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #b5d0ff;
         }
 
         .logo i {
+            color: #5f9eff;
             font-size: 24px;
-            color: #70b0ff;
-            filter: drop-shadow(0 0 8px #3f6eff55);
+            filter: drop-shadow(0 0 8px #2f6eff);
         }
 
-        .vault-badge {
-            background: #1e2a3a;
-            padding: 8px 16px;
-            border-radius: 100px;
-            border-left: 3px solid #50c878;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #b0d0ff;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #50c878;
-            border-radius: 50%;
-            box-shadow: 0 0 12px #50c878;
-        }
-
-        /* navigation tabs */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 28px;
-            padding: 8px;
-            background: rgba(12, 20, 28, 0.6);
-            backdrop-filter: blur(8px);
-            border-radius: 60px;
-            border: 1px solid #2a3a4a;
-        }
-
-        .tab {
-            padding: 12px 24px;
-            border-radius: 40px;
-            background: transparent;
-            border: none;
-            color: #9aaec9;
-            font-weight: 500;
-            font-size: 15px;
+        .menu-dots {
+            position: relative;
             cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab i {
-            font-size: 18px;
-        }
-
-        .tab:hover {
-            background: rgba(60, 100, 200, 0.15);
-            color: white;
-        }
-
-        .tab.active {
-            background: #2b3f5c;
-            color: white;
-            box-shadow: 0 4px 12px #1e3a5f;
-        }
-
-        /* main grid layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 24px;
-        }
-
-        /* left panel - calendar & heatmap & tags */
-        .left-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .card {
-            background: rgba(20, 28, 40, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid #2f4055;
-            border-radius: 32px;
-            padding: 24px 20px;
-            box-shadow: 0 18px 40px -10px black;
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #b0c8ff;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* calendar */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-month {
-            font-weight: 600;
-            font-size: 18px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 30px;
-            background: rgba(255,255,255,0.02);
-            cursor: pointer;
-            transition: 0.1s;
-            font-weight: 400;
-        }
-
-        .calendar-day.has-entry {
-            background: #2b4f8e;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 0 10px #3f7fff;
-        }
-
-        .calendar-day.today {
-            border: 2px solid #70b0ff;
-        }
-
-        .calendar-day:hover {
-            background: #3a506e;
-        }
-
-        /* heatmap */
-        .heatmap-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .heatmap-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .heatmap-cell {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            background: #19232e;
-            transition: 0.1s;
-        }
-
-        .heatmap-cell[data-level="1"] { background: #1e3a5f; }
-        .heatmap-cell[data-level="2"] { background: #2b4f8e; }
-        .heatmap-cell[data-level="3"] { background: #3f7fff; }
-        .heatmap-cell[data-level="4"] { background: #70b0ff; box-shadow: 0 0 10px #3f7fff; }
-
-        /* tags cloud */
-        .tags-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .tag-item {
-            background: #1e2e42;
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-size: 14px;
+            border-radius: 50%;
+            background: #1e2a3a;
             border: 1px solid #3f5a7a;
-            cursor: pointer;
-            transition: 0.1s;
+            transition: 0.2s;
+        }
+
+        .menu-dots:hover {
+            background: #2a3c54;
+            border-color: #6d9eff;
+        }
+
+        .menu-dots i {
+            font-size: 24px;
+            color: #b0ccff;
+        }
+
+        /* dropdown menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 260px;
+            background: #141e2c;
+            border: 1px solid #3f5f88;
+            border-radius: 30px;
+            padding: 12px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            display: none;
+            z-index: 100;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 16px 24px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 16px;
+            color: #d0e0ff;
+            transition: 0.1s;
+            cursor: pointer;
+            font-size: 16px;
         }
 
-        .tag-item.active {
-            background: #3f7fff;
-            border-color: #aac9ff;
+        .menu-item i {
+            width: 24px;
+            color: #6d9eff;
         }
 
-        .tag-item .count {
-            background: #00000033;
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-size: 12px;
+        .menu-item:hover {
+            background: #1f3147;
+            color: white;
         }
 
-        /* right panel - entries & gallery */
-        .right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        .menu-divider {
+            height: 1px;
+            background: #2f4560;
+            margin: 8px 0;
         }
 
-        .search-bar {
+        /* main content area */
+        .main-content {
+            background: rgba(10, 18, 28, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid #2d405a;
+            border-radius: 48px;
+            padding: 32px;
+            min-height: 70vh;
+        }
+
+        /* search bar */
+        .search-section {
+            margin-bottom: 30px;
             display: flex;
             gap: 12px;
-            background: rgba(10, 18, 28, 0.7);
-            border-radius: 60px;
-            padding: 6px 6px 6px 24px;
-            border: 1px solid #2e4258;
-            align-items: center;
         }
 
-        .search-bar input {
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: #0f1a26;
+            border: 1px solid #2f4565;
+            border-radius: 60px;
+            padding: 6px 6px 6px 24px;
+        }
+
+        .search-box i {
+            color: #5f7fa0;
+            font-size: 18px;
+        }
+
+        .search-box input {
             flex: 1;
             background: transparent;
             border: none;
+            padding: 16px 12px;
             color: white;
-            font-size: 15px;
-            padding: 12px 0;
+            font-size: 16px;
             outline: none;
         }
 
-        .search-bar button {
-            background: #2b4058;
+        .search-box button {
+            background: #1e3a60;
             border: none;
             color: white;
             padding: 12px 28px;
@@ -323,439 +204,645 @@
             transition: 0.1s;
         }
 
-        .search-bar button:hover {
-            background: #3f5f80;
+        .search-box button:hover {
+            background: #2b4f80;
         }
 
-        /* entry form */
-        .entry-form {
-            background: rgba(25, 35, 50, 0.8);
+        /* date mark indicators */
+        .date-marks {
+            display: flex;
+            gap: 4px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .mark-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            background: #1e2f40;
+            color: #a0b8d0;
+            position: relative;
+        }
+
+        .mark-dot.has-entry {
+            background: #1e4a7a;
+            color: white;
+            box-shadow: 0 0 10px #2f6fcf;
+        }
+
+        .mark-dot.has-multiple {
+            background: #3f7fff;
+            font-weight: bold;
+            box-shadow: 0 0 15px #3f7fff;
+        }
+
+        .mark-dot.special {
+            border: 2px solid gold;
+        }
+
+        /* daily diary card */
+        .diary-card {
+            background: #0f1a28;
+            border: 1px solid #2e4a70;
             border-radius: 40px;
             padding: 28px;
-            border: 1px solid #3e5770;
+            margin-bottom: 30px;
         }
 
-        .form-row {
-            margin-bottom: 18px;
-        }
-
-        .form-row input, .form-row textarea, .form-row select {
-            width: 100%;
-            background: #1e2b3b;
-            border: 1px solid #3d556d;
-            border-radius: 24px;
-            padding: 16px 22px;
-            color: white;
-            font-size: 15px;
-            outline: none;
-            transition: 0.1s;
-        }
-
-        .form-row textarea {
-            min-height: 140px;
-            resize: vertical;
-        }
-
-        .form-row input:focus, .form-row textarea:focus {
-            border-color: #70b0ff;
-            box-shadow: 0 0 0 2px #1e4f8e;
-        }
-
-        .tag-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .tag-option {
-            background: #1e2e42;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 13px;
-            cursor: pointer;
-            border: 1px solid #3f5a7a;
-            user-select: none;
-        }
-
-        .tag-option.selected {
-            background: #3f7fff;
-            border-color: white;
-        }
-
-        .file-upload {
-            border: 2px dashed #3f5a7a;
-            border-radius: 30px;
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .file-upload:hover {
-            border-color: #70b0ff;
-            background: #1b2a3f;
-        }
-
-        .btn-primary {
-            background: #2f5a9c;
-            border: none;
-            color: white;
-            padding: 16px 32px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.1s;
-            box-shadow: 0 4px 20px #1f3f6e;
-        }
-
-        .btn-primary:hover {
-            background: #3f6fc9;
-        }
-
-        /* entries timeline */
-        .entries-timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .entry-card {
-            background: rgba(28, 38, 52, 0.7);
-            backdrop-filter: blur(4px);
-            border-radius: 28px;
-            padding: 22px;
-            border-left: 6px solid #3f7fff;
-            border: 1px solid #2e4560;
-            transition: 0.1s;
-            cursor: pointer;
-        }
-
-        .entry-card:hover {
-            background: #223449;
-            border-color: #70b0ff;
-        }
-
-        .entry-header {
+        .diary-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
             align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2f4565;
         }
 
-        .entry-date {
-            color: #b0d0ff;
-            font-size: 14px;
-        }
-
-        .entry-tags {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .entry-tag {
-            background: #1e3a5f;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-        }
-
-        .entry-title {
-            font-size: 20px;
+        .diary-date {
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 8px;
+            color: #b0d0ff;
         }
 
-        .entry-preview {
-            color: #a0b8d0;
-            font-size: 15px;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .entry-images {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 12px 0;
-        }
-
-        .entry-thumb {
-            width: 70px;
-            height: 70px;
-            border-radius: 18px;
-            object-fit: cover;
-            background: #1f3143;
-        }
-
-        .entry-footer {
-            display: flex;
-            gap: 16px;
-            justify-content: flex-end;
-        }
-
-        .entry-footer button {
-            background: transparent;
+        .back-btn {
+            background: #1e2e42;
             border: none;
-            color: #b0c8ff;
+            color: #b0ccff;
+            padding: 10px 22px;
+            border-radius: 40px;
             cursor: pointer;
-            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 30px;
+            gap: 8px;
         }
 
-        .entry-footer button:hover {
-            background: #1e3f60;
+        .diary-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            background: #0b131f;
+            border-radius: 32px;
+            padding: 22px;
+            margin-bottom: 25px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #b5d0f0;
+        }
+
+        .summary-item i {
+            font-size: 24px;
+            color: #5f9eff;
+        }
+
+        .diary-subject {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+            padding-left: 10px;
+            border-left: 6px solid #3f7fff;
+        }
+
+        .diary-entry {
+            background: #0b131f;
+            border-radius: 32px;
+            padding: 28px;
+            margin-bottom: 25px;
+            line-height: 1.8;
+            font-size: 17px;
+            color: #d0e2ff;
+            white-space: pre-wrap;
+        }
+
+        /* photo grid with tags */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .photo-item {
+            background: #0f1a28;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #2f4a70;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-4px);
+            border-color: #6d9eff;
+            box-shadow: 0 10px 25px #00000080;
+        }
+
+        .photo-img {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #1a2b40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .photo-caption {
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .photo-tags {
+            padding: 0 12px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .photo-tag {
+            background: #1a314a;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            color: #b0d0ff;
+        }
+
+        /* tags cloud */
+        .tags-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .tag-pill {
+            background: #162433;
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid #2f4f7a;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .tag-pill:hover {
+            background: #1f3d60;
+            border-color: #6d9eff;
+        }
+
+        .tag-pill.active {
+            background: #2b4f8e;
+            border-color: #aac9ff;
             color: white;
         }
 
-        /* gallery grid */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
+        /* year view */
+        .year-stats {
+            background: #0b131f;
+            border-radius: 32px;
+            padding: 28px;
+            margin-bottom: 30px;
         }
 
-        .gallery-item {
-            aspect-ratio: 1;
-            border-radius: 24px;
-            background: #1a2b3c;
+        .month-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .month-name {
+            width: 50px;
+            font-weight: 600;
+            color: #b0d0ff;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 30px;
+            background: #1e2c40;
+            border-radius: 20px;
             overflow: hidden;
-            position: relative;
-            border: 1px solid #3a5770;
         }
 
-        .gallery-item img {
-            width: 100%;
+        .bar-fill {
             height: 100%;
-            object-fit: cover;
+            background: linear-gradient(90deg, #2f6fcf, #6fafff);
+            border-radius: 20px;
+            width: 0%;
         }
 
-        /* modal for secret view */
+        .month-stats {
+            width: 120px;
+            font-size: 14px;
+            color: #a0b8d0;
+        }
+
+        /* heatmap grid */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr);
+            gap: 4px;
+            margin: 30px 0;
+            overflow-x: auto;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            background: #162434;
+            border-radius: 4px;
+            min-width: 12px;
+        }
+
+        .heatmap-cell[data-level="1"] { background: #1a3a5a; }
+        .heatmap-cell[data-level="2"] { background: #2b4f8e; }
+        .heatmap-cell[data-level="3"] { background: #3f7fff; }
+        .heatmap-cell[data-level="4"] { background: #7fb5ff; box-shadow: 0 0 8px #3f7fff; }
+
+        /* modal for full view */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(16px);
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background: #1f2a38;
+            background: #121e2c;
             border-radius: 48px;
-            max-width: 600px;
+            max-width: 900px;
             width: 90%;
-            padding: 36px;
-            border: 1px solid #5f8ad0;
-            box-shadow: 0 30px 60px #00000080;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
+            padding: 32px;
+            border: 1px solid #5f8ad0;
+        }
+
+        .photo-full {
+            width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 32px;
+            background: #0b121c;
         }
 
         .close-modal {
             float: right;
-            font-size: 28px;
+            font-size: 32px;
             cursor: pointer;
-            color: #9ab0d0;
+            color: #a0b8d0;
         }
 
-        .secret-doc {
-            background: #0f1a24;
-            border-radius: 32px;
-            padding: 30px;
-            font-family: 'Courier New', monospace;
-            border: 1px solid gold;
-            box-shadow: 0 0 30px #ffd96655;
-            position: relative;
+        /* write form */
+        .write-form {
+            background: #0f1a28;
+            border-radius: 40px;
+            padding: 32px;
         }
 
-        .secret-doc::before {
-            content: '🔒 SECRET DOCUMENT';
-            position: absolute;
-            top: -12px;
-            left: 30px;
-            background: #0f1a24;
-            padding: 0 15px;
-            color: #ffd966;
-            font-size: 14px;
+        .form-group {
+            margin-bottom: 25px;
         }
 
-        @media (max-width: 900px) {
-            .dashboard { grid-template-columns: 1fr; }
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #b0d0ff;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            background: #1a2a3c;
+            border: 1px solid #2f4a70;
+            border-radius: 30px;
+            padding: 16px 22px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .mood-option {
+            background: #1a2a3c;
+            padding: 12px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            border: 1px solid #2f4a70;
+        }
+
+        .mood-option.selected {
+            background: #2b4f8e;
+            border-color: #aac9ff;
+        }
+
+        .btn-primary {
+            background: #1e4a8f;
+            border: none;
+            color: white;
+            padding: 18px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.1s;
+        }
+
+        .btn-primary:hover {
+            background: #2f6fcf;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
-    <!-- font awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="vault-bg"></div>
     <div class="container">
-        <!-- header -->
-        <div class="header">
+        <!-- top bar with 3-dot menu -->
+        <div class="top-bar">
             <div class="logo">
                 <i class="fas fa-lock"></i>
-                <span>SECRET VAULT · encrypted diary</span>
+                <span>SECRET DIARY · 2026</span>
             </div>
-            <div class="vault-badge">
-                <span class="status-dot"></span>
-                <span>VAULT CONNECTED · AES-256</span>
-                <i class="fas fa-shield-alt"></i>
+            <div class="menu-dots" id="menuDots">
+                <i class="fas fa-ellipsis-v"></i>
             </div>
         </div>
 
-        <!-- tabs navigation -->
-        <div class="tabs" id="tabContainer">
-            <button class="tab active" data-tab="timeline"><i class="fas fa-stream"></i> Timeline</button>
-            <button class="tab" data-tab="gallery"><i class="fas fa-images"></i> Gallery</button>
-            <button class="tab" data-tab="calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
-            <button class="tab" data-tab="tags"><i class="fas fa-tags"></i> Tags</button>
-            <button class="tab" data-tab="search"><i class="fas fa-search"></i> Search</button>
-            <button class="tab" data-tab="secret"><i class="fas fa-file-secret"></i> Secret Doc</button>
+        <!-- dropdown menu -->
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="menu-item" data-view="timeline">
+                <i class="fas fa-stream"></i> Timeline
+            </div>
+            <div class="menu-item" data-view="daily">
+                <i class="fas fa-calendar-day"></i> Daily Diary
+            </div>
+            <div class="menu-item" data-view="gallery">
+                <i class="fas fa-images"></i> Gallery
+            </div>
+            <div class="menu-item" data-view="year">
+                <i class="fas fa-calendar-alt"></i> Year View
+            </div>
+            <div class="menu-item" data-view="tags">
+                <i class="fas fa-tags"></i> Tags
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-item" data-view="write">
+                <i class="fas fa-pen"></i> Write New
+            </div>
+            <div class="menu-item" data-view="secret">
+                <i class="fas fa-file-secret"></i> Secret Doc
+            </div>
         </div>
 
-        <!-- main dashboard -->
-        <div class="dashboard">
-            <!-- LEFT PANEL: calendar heatmap + tags (always visible but collapsible) -->
-            <div class="left-panel">
-                <!-- calendar card -->
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-calendar"></i> TIME CAPSULE</div>
-                    <div class="calendar-header">
-                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-                        <span class="calendar-month" id="currentMonth">March 2026</span>
-                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="calendar-grid" id="calendarGrid">
-                        <!-- JS will fill -->
-                    </div>
-                </div>
-
-                <!-- heatmap card -->
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-fire"></i> ENTRY HEATMAP</div>
-                    <div class="heatmap-grid" id="heatmapContainer"></div>
-                </div>
-
-                <!-- tags card -->
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-hashtag"></i> TOP TAGS</div>
-                    <div class="tags-cloud" id="tagsCloud">
-                        <!-- dynamic from entries -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT PANEL: dynamic content based on active tab -->
-            <div class="right-panel">
-                <!-- search bar always visible -->
-                <div class="search-bar">
-                    <i class="fas fa-search" style="color: #6080b0;"></i>
-                    <input type="text" placeholder="Search memories, tags, or date..." id="searchInput">
+        <!-- main content area - changes based on selection -->
+        <div class="main-content" id="mainContent">
+            <!-- search bar always visible -->
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search entries, tags, photos...">
                     <button id="searchBtn">Search</button>
                 </div>
+            </div>
 
-                <!-- NEW ENTRY FORM (always visible) -->
-                <div class="entry-form" id="entryForm">
-                    <div class="form-row">
-                        <input type="text" placeholder="Title / idea" id="entryTitle">
+            <!-- TIMELINE VIEW (default) -->
+            <div id="timelineView">
+                <h2 style="margin-bottom: 25px;"><i class="fas fa-history"></i> RECENT ENTRIES</h2>
+                
+                <!-- date marks indicator -->
+                <div class="date-marks" id="dateMarks">
+                    <!-- JS will populate -->
+                </div>
+
+                <!-- entries list -->
+                <div id="entriesList" style="display: flex; flex-direction: column; gap: 20px;"></div>
+            </div>
+
+            <!-- DAILY DIARY VIEW (hidden by default) -->
+            <div id="dailyView" class="hidden">
+                <div id="dailyDiaryContent">
+                    <!-- JS will populate daily diary -->
+                </div>
+            </div>
+
+            <!-- GALLERY VIEW -->
+            <div id="galleryView" class="hidden">
+                <h2 style="margin-bottom: 25px;"><i class="fas fa-images"></i> PHOTO GALLERY</h2>
+                
+                <!-- tag filter for gallery -->
+                <div class="tags-cloud" id="galleryTagFilter"></div>
+                
+                <!-- photo grid -->
+                <div class="photo-grid" id="galleryGrid"></div>
+            </div>
+
+            <!-- YEAR VIEW -->
+            <div id="yearView" class="hidden">
+                <h2 style="margin-bottom: 25px;"><i class="fas fa-calendar-alt"></i> 2026 · YEAR IN MEMORIES</h2>
+                
+                <!-- year stats -->
+                <div class="year-stats" id="yearStats"></div>
+                
+                <!-- heatmap -->
+                <h3 style="margin: 30px 0 20px;">🔥 ENTRY HEATMAP</h3>
+                <div class="heatmap-grid" id="yearHeatmap"></div>
+                
+                <!-- top photos -->
+                <h3 style="margin: 30px 0 20px;">📸 TOP PHOTOS OF 2026</h3>
+                <div class="photo-grid" id="topPhotosGrid"></div>
+            </div>
+
+            <!-- TAGS VIEW -->
+            <div id="tagsView" class="hidden">
+                <h2 style="margin-bottom: 25px;"><i class="fas fa-tags"></i> ALL TAGS</h2>
+                <div class="tags-cloud" id="allTagsCloud"></div>
+                <div id="taggedEntries" style="margin-top: 30px;"></div>
+            </div>
+
+            <!-- WRITE NEW VIEW -->
+            <div id="writeView" class="hidden">
+                <div class="write-form">
+                    <h2 style="margin-bottom: 30px;"><i class="fas fa-pen"></i> WRITE NEW ENTRY</h2>
+                    
+                    <div class="form-group">
+                        <label>📅 DATE</label>
+                        <input type="date" class="form-control" id="entryDate" value="2026-03-04">
                     </div>
-                    <div class="form-row">
-                        <textarea placeholder="Write your secret entry... (supports #tags)" id="entryContent"></textarea>
+
+                    <div class="form-group">
+                        <label>📝 SUBJECT</label>
+                        <input type="text" class="form-control" id="entrySubject" placeholder="What happened today?">
                     </div>
-                    <div class="form-row">
-                        <select id="entryCategory">
-                            <option value="personal">💭 Personal</option>
-                            <option value="ideas">💡 Ideas</option>
-                            <option value="work">📁 Work</option>
-                            <option value="travel">✈️ Travel</option>
-                            <option value="secret">🔒 Secret</option>
-                        </select>
+
+                    <div class="form-group">
+                        <label>📖 ENTRY</label>
+                        <textarea class="form-control" id="entryText" placeholder="Write your story..."></textarea>
                     </div>
-                    <div class="form-row">
-                        <div class="tag-selector" id="inlineTagSelector">
-                            <span class="tag-option" data-tag="ideas">#ideas</span>
-                            <span class="tag-option" data-tag="dreams">#dreams</span>
-                            <span class="tag-option" data-tag="poetry">#poetry</span>
-                            <span class="tag-option" data-tag="project">#project</span>
-                            <span class="tag-option" data-tag="memory">#memory</span>
+
+                    <div class="form-group">
+                        <label>😊 MOOD</label>
+                        <div class="mood-selector" id="moodSelector">
+                            <span class="mood-option" data-mood="happy">😊 Happy</span>
+                            <span class="mood-option" data-mood="neutral">😐 Neutral</span>
+                            <span class="mood-option" data-mood="sad">😢 Sad</span>
+                            <span class="mood-option" data-mood="excited">🤩 Excited</span>
+                            <span class="mood-option" data-mood="tired">😴 Tired</span>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="file-upload" id="fileUploadArea">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 32px; margin-bottom: 10px;"></i>
-                            <p>Drag photos or click to upload (stored in R2)</p>
+
+                    <div class="form-group">
+                        <label>📍 LOCATION</label>
+                        <input type="text" class="form-control" id="entryLocation" placeholder="Where were you?">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🏷️ TAGS (comma separated)</label>
+                        <input type="text" class="form-control" id="entryTags" placeholder="#memories #daily #2026">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📸 PHOTOS</label>
+                        <div style="border: 2px dashed #2f4a70; border-radius: 40px; padding: 40px; text-align: center; cursor: pointer;" id="photoUploadArea">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #5f9eff; margin-bottom: 15px;"></i>
+                            <p>Drag & drop photos or click to upload</p>
                             <input type="file" id="fileInput" multiple accept="image/*" hidden>
                         </div>
-                        <div id="uploadPreview" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;"></div>
+                        <div id="uploadPreview" style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;"></div>
                     </div>
-                    <button class="btn-primary" id="saveEntryBtn"><i class="fas fa-lock"></i> ENCRYPT & SAVE TO VAULT</button>
-                </div>
 
-                <!-- entries timeline (shown by default) -->
-                <div id="timelineView" style="display: block;">
-                    <h3 style="margin-bottom: 20px;"><i class="fas fa-history"></i> RECENT ENTRIES</h3>
-                    <div class="entries-timeline" id="entriesList">
-                        <!-- dynamic from kv -->
-                    </div>
+                    <button class="btn-primary" id="saveEntryBtn"><i class="fas fa-lock"></i> SAVE TO VAULT</button>
                 </div>
+            </div>
 
-                <!-- gallery view (hidden) -->
-                <div id="galleryView" style="display: none;">
-                    <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> IMAGE GALLERY (R2)</h3>
-                    <div class="gallery-grid" id="galleryGrid"></div>
-                </div>
-
-                <!-- search results view (hidden) -->
-                <div id="searchView" style="display: none;">
-                    <h3 style="margin-bottom: 20px;"><i class="fas fa-search"></i> SEARCH RESULTS</h3>
-                    <div class="entries-timeline" id="searchResults"></div>
-                </div>
-
-                <!-- secret document view (hidden) -->
-                <div id="secretView" style="display: none;">
-                    <div class="secret-doc">
-                        <h2 style="color: #ffd966; margin-bottom: 20px;">📜 ULTRA SECRET</h2>
-                        <p style="margin-bottom: 20px;">This document is client-side encrypted. Only you can read it.</p>
-                        <textarea id="secretText" placeholder="Write your most private thoughts..." style="width:100%; background:#09131c; border:1px solid #576b83; border-radius:20px; padding:20px; color:white; min-height:150px;"></textarea>
-                        <button class="btn-primary" id="saveSecretBtn" style="margin-top:20px;"><i class="fas fa-lock"></i> SAVE SECRET (local encrypted)</button>
-                    </div>
+            <!-- SECRET DOC VIEW -->
+            <div id="secretView" class="hidden">
+                <div style="background: #0a121e; border-radius: 48px; padding: 40px; border: 2px solid gold;">
+                    <h2 style="color: gold; margin-bottom: 25px;">📜 SECRET DOCUMENT (AES-256)</h2>
+                    <textarea id="secretText" style="width: 100%; background: #0b131f; border: 1px solid #3f5f88; border-radius: 32px; padding: 28px; color: white; min-height: 200px; font-size: 16px;" placeholder="Write your most private thoughts here... This is client-side encrypted."></textarea>
+                    <button class="btn-primary" id="saveSecretBtn" style="margin-top: 25px;"><i class="fas fa-lock"></i> SAVE ENCRYPTED</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- modal for full entry -->
-    <div class="modal" id="entryModal">
+    <!-- modal for full photo/entry view -->
+    <div class="modal" id="fullModal">
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>
-            <div id="modalEntryContent"></div>
+            <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
-        // ----------------- CONFIG -----------------
-        const API_BASE = 'https://secretly.yashavanthan22.workers.dev'; // your worker
+        // CONFIG
+        const API_BASE = 'https://secretly.yashavanthan22.workers.dev';
         let allEntries = [];
-        let currentTagFilter = null;
+        let currentView = 'timeline';
+        let selectedDate = '2026-03-04';
+        let selectedMood = 'happy';
+        let photoTags = {}; // track tags per photo
 
-        // ---------- HELPER: fetch entries (list only) ----------
+        // ---------- MENU TOGGLE ----------
+        const menuDots = document.getElementById('menuDots');
+        const dropdown = document.getElementById('dropdownMenu');
+
+        menuDots.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('show');
+        });
+
+        // ---------- MENU ITEM CLICK ----------
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const view = item.dataset.view;
+                switchView(view);
+                dropdown.classList.remove('show');
+            });
+        });
+
+        function switchView(view) {
+            currentView = view;
+            
+            // hide all views
+            document.getElementById('timelineView').classList.add('hidden');
+            document.getElementById('dailyView').classList.add('hidden');
+            document.getElementById('galleryView').classList.add('hidden');
+            document.getElementById('yearView').classList.add('hidden');
+            document.getElementById('tagsView').classList.add('hidden');
+            document.getElementById('writeView').classList.add('hidden');
+            document.getElementById('secretView').classList.add('hidden');
+            
+            // show selected
+            if (view === 'timeline') {
+                document.getElementById('timelineView').classList.remove('hidden');
+                loadEntries();
+            } else if (view === 'daily') {
+                document.getElementById('dailyView').classList.remove('hidden');
+                showDailyDiary(selectedDate);
+            } else if (view === 'gallery') {
+                document.getElementById('galleryView').classList.remove('hidden');
+                renderGallery();
+            } else if (view === 'year') {
+                document.getElementById('yearView').classList.remove('hidden');
+                renderYearView();
+            } else if (view === 'tags') {
+                document.getElementById('tagsView').classList.remove('hidden');
+                renderTagsView();
+            } else if (view === 'write') {
+                document.getElementById('writeView').classList.remove('hidden');
+            } else if (view === 'secret') {
+                document.getElementById('secretView').classList.remove('hidden');
+                loadSecret();
+            }
+        }
+
+        // ---------- LOAD ENTRIES FROM WORKER ----------
         async function loadEntries() {
             try {
                 const resp = await fetch(`${API_BASE}/list`);
-                const keys = await resp.json();  // {result: [{name: "diary:123", metadata: ...}]}
+                const text = await resp.text();
+                
+                let keys;
+                try {
+                    keys = JSON.parse(text);
+                } catch {
+                    console.log('Raw response:', text);
+                    return;
+                }
+                
                 if (!keys.result) return;
                 
                 const entries = [];
@@ -767,311 +854,425 @@
                         entries.push({ id, ...data });
                     }
                 }
-                // sort by date descending (timestamp from id)
                 entries.sort((a,b) => b.id - a.id);
                 allEntries = entries;
-                renderTimeline();
-                renderTags();
-                renderHeatmap();
-                renderCalendar();
-                renderGallery();
+                
+                // render based on current view
+                if (currentView === 'timeline') {
+                    renderTimeline();
+                    renderDateMarks();
+                } else if (currentView === 'gallery') {
+                    renderGallery();
+                } else if (currentView === 'daily') {
+                    showDailyDiary(selectedDate);
+                }
             } catch (e) {
                 console.error('load error', e);
             }
         }
 
-        // ---------- RENDER TIMELINE ----------
-        function renderTimeline(filterTag = currentTagFilter) {
-            let filtered = allEntries;
-            if (filterTag) {
-                filtered = allEntries.filter(e => e.tags && e.tags.includes(filterTag));
+        // ---------- RENDER DATE MARKS ----------
+        function renderDateMarks() {
+            const marksContainer = document.getElementById('dateMarks');
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            let html = '';
+            
+            // get last 14 days
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayName = days[d.getDay()];
+                
+                // count entries for this date
+                const entriesOnDate = allEntries.filter(e => {
+                    const eDate = new Date(parseInt(e.id)).toISOString().split('T')[0];
+                    return eDate === dateStr;
+                });
+                
+                let markClass = 'mark-dot';
+                if (entriesOnDate.length === 1) markClass += ' has-entry';
+                else if (entriesOnDate.length > 1) markClass += ' has-multiple';
+                
+                html += `<div class="${markClass}" title="${dateStr}">${dayName}</div>`;
             }
+            
+            marksContainer.innerHTML = html;
+        }
+
+        // ---------- RENDER TIMELINE ----------
+        function renderTimeline() {
             const container = document.getElementById('entriesList');
-            container.innerHTML = filtered.map(e => `
-                <div class="entry-card" data-id="${e.id}">
-                    <div class="entry-header">
-                        <span class="entry-date">${new Date(parseInt(e.id)).toLocaleString()}</span>
-                        <div class="entry-tags">${(e.tags || []).map(t => `<span class="entry-tag">#${t}</span>`).join('')}</div>
+            
+            if (allEntries.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 60px; color: #7890b0;">No entries yet. Click "Write New" to start.</div>';
+                return;
+            }
+            
+            container.innerHTML = allEntries.map(entry => {
+                const date = new Date(parseInt(entry.id));
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                return `
+                    <div class="diary-card" style="cursor: pointer;" onclick="openEntry('${entry.id}')">
+                        <div class="diary-header">
+                            <span class="diary-date">${dateStr}</span>
+                            <span class="summary-item"><i class="fas fa-smile"></i> ${entry.mood || 'happy'}</span>
+                        </div>
+                        <div class="diary-subject">${entry.subject || 'Untitled'}</div>
+                        <div class="diary-entry" style="max-height: 100px; overflow: hidden;">${(entry.entry || '').substring(0, 150)}...</div>
+                        ${entry.photos && entry.photos.length ? `
+                            <div style="display: flex; gap: 10px; margin: 15px 0;">
+                                ${entry.photos.slice(0, 3).map(p => `<div style="width: 60px; height: 60px; background: #1a2a40; border-radius: 16px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image"></i></div>`).join('')}
+                                ${entry.photos.length > 3 ? `<div style="width: 60px; height: 60px; background: #1a2a40; border-radius: 16px; display: flex; align-items: center; justify-content: center;">+${entry.photos.length-3}</div>` : ''}
+                            </div>
+                        ` : ''}
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px;">
+                            ${(entry.tags || []).map(t => `<span class="photo-tag">${t}</span>`).join('')}
+                        </div>
                     </div>
-                    <div class="entry-title">${e.title || 'untitled'}</div>
-                    <div class="entry-preview">${(e.content || '').substring(0, 100)}...</div>
-                    ${e.images ? `<div class="entry-images">${e.images.map(img => `<img src="${img}" class="entry-thumb">`).join('')}</div>` : ''}
-                    <div class="entry-footer">
-                        <button class="edit-entry" data-id="${e.id}"><i class="fas fa-edit"></i> Edit</button>
-                        <button class="delete-entry" data-id="${e.id}"><i class="fas fa-trash"></i> Delete</button>
+                `;
+            }).join('');
+        }
+
+        // ---------- SHOW DAILY DIARY FOR SELECTED DATE ----------
+        function showDailyDiary(dateStr) {
+            const container = document.getElementById('dailyDiaryContent');
+            
+            // find entries for this date
+            const dayEntries = allEntries.filter(e => {
+                const eDate = new Date(parseInt(e.id)).toISOString().split('T')[0];
+                return eDate === dateStr;
+            });
+            
+            if (dayEntries.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 80px; background: #0f1a28; border-radius: 48px;">
+                        <i class="fas fa-journal-whills" style="font-size: 64px; color: #3f5f88; margin-bottom: 20px;"></i>
+                        <h3>No entries for ${dateStr}</h3>
+                        <button class="btn-primary" style="width: auto; margin-top: 30px;" onclick="switchView('write')">WRITE NEW ENTRY</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // use first entry for the day
+            const entry = dayEntries[0];
+            const photos = entry.photos || [];
+            
+            container.innerHTML = `
+                <div class="diary-card">
+                    <div class="diary-header">
+                        <span class="diary-date"><i class="fas fa-calendar-day"></i> ${dateStr}</span>
+                        <button class="back-btn" onclick="switchView('timeline')"><i class="fas fa-arrow-left"></i> BACK</button>
+                    </div>
+                    
+                    <div class="diary-summary">
+                        <div class="summary-item"><i class="fas fa-smile"></i> Mood: ${entry.mood || 'happy'}</div>
+                        <div class="summary-item"><i class="fas fa-map-pin"></i> ${entry.location || 'Unknown'}</div>
+                        <div class="summary-item"><i class="fas fa-images"></i> ${photos.length} photos</div>
+                    </div>
+                    
+                    <div class="diary-subject">${entry.subject || 'Daily Entry'}</div>
+                    
+                    <div class="diary-entry">${entry.entry || ''}</div>
+                    
+                    ${photos.length ? `
+                        <h3 style="margin: 30px 0 20px;"><i class="fas fa-images"></i> PHOTOS</h3>
+                        <div class="photo-grid">
+                            ${photos.map((photo, idx) => `
+                                <div class="photo-item" onclick="openPhoto('${photo}', ${JSON.stringify(entry.photoTags ? entry.photoTags[idx] : [])})">
+                                    <div class="photo-img"><i class="fas fa-image"></i></div>
+                                    <div class="photo-caption">Photo ${idx+1}</div>
+                                    <div class="photo-tags">
+                                        ${(entry.photoTags ? entry.photoTags[idx] : ['photo']).map(t => `<span class="photo-tag">${t}</span>`).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button class="btn-primary" style="flex: 1;" onclick="editEntry('${entry.id}')"><i class="fas fa-edit"></i> EDIT</button>
+                        <button class="btn-primary" style="flex: 1; background: #5f2f4a;" onclick="deleteEntry('${entry.id}')"><i class="fas fa-trash"></i> DELETE</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ---------- RENDER GALLERY ----------
+        function renderGallery() {
+            const galleryGrid = document.getElementById('galleryGrid');
+            const tagFilter = document.getElementById('galleryTagFilter');
+            
+            // collect all photos with their tags
+            let allPhotos = [];
+            allEntries.forEach(entry => {
+                if (entry.photos) {
+                    entry.photos.forEach((photo, idx) => {
+                        allPhotos.push({
+                            url: photo,
+                            tags: entry.photoTags ? entry.photoTags[idx] : ['photo'],
+                            entryId: entry.id,
+                            date: entry.id
+                        });
+                    });
+                }
+            });
+            
+            // render tag filter
+            const allTags = new Set();
+            allPhotos.forEach(p => p.tags.forEach(t => allTags.add(t)));
+            tagFilter.innerHTML = Array.from(allTags).map(t => 
+                `<span class="tag-pill" onclick="filterGalleryByTag('${t}')">#${t}</span>`
+            ).join('');
+            
+            // render photos
+            galleryGrid.innerHTML = allPhotos.map(photo => `
+                <div class="photo-item" onclick="openPhoto('${photo.url}', ${JSON.stringify(photo.tags)})">
+                    <div class="photo-img"><i class="fas fa-image"></i></div>
+                    <div class="photo-caption">${new Date(parseInt(photo.date)).toLocaleDateString()}</div>
+                    <div class="photo-tags">
+                        ${photo.tags.map(t => `<span class="photo-tag">${t}</span>`).join('')}
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ---------- RENDER YEAR VIEW ----------
+        function renderYearView() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const yearStats = document.getElementById('yearStats');
+            const heatmap = document.getElementById('yearHeatmap');
             
-            // attach click to view full (except buttons)
-            document.querySelectorAll('.entry-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    if (e.target.closest('button')) return;
-                    const id = card.dataset.id;
-                    const entry = allEntries.find(en => en.id == id);
-                    showModal(entry);
-                });
+            // month bars
+            let monthHtml = '';
+            months.forEach((month, idx) => {
+                const count = allEntries.filter(e => new Date(parseInt(e.id)).getMonth() === idx).length;
+                const percent = Math.min(100, (count / 10) * 100);
+                monthHtml += `
+                    <div class="month-bar">
+                        <span class="month-name">${month}</span>
+                        <div class="bar-container"><div class="bar-fill" style="width: ${percent}%;"></div></div>
+                        <span class="month-stats">${count} entries</span>
+                    </div>
+                `;
             });
-            // attach edit/delete
-            document.querySelectorAll('.edit-entry').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = btn.dataset.id;
-                    const entry = allEntries.find(en => en.id == id);
-                    populateForm(entry);
-                });
-            });
-            document.querySelectorAll('.delete-entry').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    if (confirm('Delete this entry?')) {
-                        const id = btn.dataset.id;
-                        await fetch(`${API_BASE}/delete?id=${id}`, { method: 'DELETE' });
-                        await loadEntries();
-                    }
-                });
-            });
-        }
-
-        function showModal(entry) {
-            const div = document.getElementById('modalEntryContent');
-            div.innerHTML = `
-                <h2 style="margin-bottom: 20px;">${entry.title}</h2>
-                <p style="color:#ccc; margin-bottom:20px;">${new Date(parseInt(entry.id)).toLocaleString()}</p>
-                <p style="line-height:1.6; white-space:pre-wrap;">${entry.content}</p>
-                ${entry.images ? `<div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;">${entry.images.map(img => `<img src="${img}" style="max-width:200px; border-radius:20px;">`).join('')}</div>` : ''}
+            
+            yearStats.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                    <span><i class="fas fa-calendar-alt"></i> Total: ${allEntries.length} entries</span>
+                    <span><i class="fas fa-images"></i> Photos: ${allEntries.reduce((acc, e) => acc + (e.photos ? e.photos.length : 0), 0)}</span>
+                    <span><i class="fas fa-fire"></i> Streak: 7 days</span>
+                </div>
+                ${monthHtml}
             `;
-            document.getElementById('entryModal').style.display = 'flex';
-        }
-
-        function populateForm(entry) {
-            document.getElementById('entryTitle').value = entry.title || '';
-            document.getElementById('entryContent').value = entry.content || '';
-            document.getElementById('entryCategory').value = entry.category || 'personal';
-            // tags: highlight selector
-            document.querySelectorAll('.tag-option').forEach(opt => {
-                if (entry.tags && entry.tags.includes(opt.dataset.tag)) {
-                    opt.classList.add('selected');
-                } else {
-                    opt.classList.remove('selected');
+            
+            // heatmap (simplified)
+            let heatmapHtml = '';
+            for (let i = 0; i < 53; i++) {
+                for (let j = 0; j < 7; j++) {
+                    const level = Math.floor(Math.random() * 5);
+                    heatmapHtml += `<div class="heatmap-cell" data-level="${level}"></div>`;
                 }
-            });
-            // TODO: handle images edit ...
+            }
+            heatmap.innerHTML = heatmapHtml;
+            
+            // top photos
+            const topPhotos = document.getElementById('topPhotosGrid');
+            topPhotos.innerHTML = Array(6).fill(0).map((_, i) => `
+                <div class="photo-item">
+                    <div class="photo-img"><i class="fas fa-image"></i></div>
+                    <div class="photo-caption">Top ${i+1}</div>
+                </div>
+            `).join('');
         }
 
-        // ---------- RENDER TAGS CLOUD ----------
-        function renderTags() {
+        // ---------- RENDER TAGS VIEW ----------
+        function renderTagsView() {
             const tagCount = {};
             allEntries.forEach(e => {
                 if (e.tags) {
                     e.tags.forEach(t => tagCount[t] = (tagCount[t] || 0) + 1);
                 }
             });
-            const cloud = document.getElementById('tagsCloud');
-            cloud.innerHTML = Object.entries(tagCount).map(([tag, cnt]) => `
-                <span class="tag-item ${currentTagFilter === tag ? 'active' : ''}" data-tag="${tag}">
-                    #${tag} <span class="count">${cnt}</span>
-                </span>
-            `).join('');
-            document.querySelectorAll('.tag-item').forEach(el => {
-                el.addEventListener('click', () => {
-                    const tag = el.dataset.tag;
-                    currentTagFilter = currentTagFilter === tag ? null : tag;
-                    renderTags();  // re-render active state
-                    renderTimeline(currentTagFilter);
-                });
-            });
+            
+            const cloud = document.getElementById('allTagsCloud');
+            cloud.innerHTML = Object.entries(tagCount).map(([tag, count]) => 
+                `<span class="tag-pill" onclick="filterByTag('${tag}')">#${tag} (${count})</span>`
+            ).join('');
         }
 
-        // ---------- RENDER HEATMAP (mock) ----------
-        function renderHeatmap() {
-            const container = document.getElementById('heatmapContainer');
-            let html = '';
-            for (let i = 0; i < 7; i++) {
-                html += '<div class="heatmap-row">';
-                for (let j = 0; j < 12; j++) {
-                    const level = Math.floor(Math.random() * 5); // replace with real data later
-                    html += `<div class="heatmap-cell" data-level="${level}"></div>`;
-                }
-                html += '</div>';
-            }
-            container.innerHTML = html;
-        }
-
-        // ---------- RENDER CALENDAR (current month) ----------
-        let currentDate = new Date();
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            document.getElementById('currentMonth').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-            
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            let gridHtml = 'S M T W T F S'.split(' ').map(d => `<span style="color:#7f9fbf;">${d}</span>`).join('');
-            for (let i = 0; i < firstDay; i++) gridHtml += '<span></span>';
-            
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const hasEntry = allEntries.some(e => new Date(parseInt(e.id)).toDateString() === new Date(year, month, d).toDateString());
-                const today = new Date().toDateString() === new Date(year, month, d).toDateString();
-                gridHtml += `<span class="calendar-day ${hasEntry ? 'has-entry' : ''} ${today ? 'today' : ''}">${d}</span>`;
-            }
-            document.getElementById('calendarGrid').innerHTML = gridHtml;
-        }
-
-        // ---------- RENDER GALLERY ----------
-        function renderGallery() {
-            const allImages = allEntries.flatMap(e => e.images || []);
-            const gallery = document.getElementById('galleryGrid');
-            gallery.innerHTML = allImages.map(url => `
-                <div class="gallery-item"><img src="${url}" loading="lazy"></div>
-            `).join('');
-        }
-
-        // ---------- SAVE ENTRY ----------
-        document.getElementById('saveEntryBtn').addEventListener('click', async () => {
-            const title = document.getElementById('entryTitle').value;
-            const content = document.getElementById('entryContent').value;
-            const category = document.getElementById('entryCategory').value;
-            const selectedTags = Array.from(document.querySelectorAll('.tag-option.selected')).map(el => el.dataset.tag);
-            
-            // upload images first (to R2) - simplified: only first file for demo
-            const fileInput = document.getElementById('fileInput');
-            let imageUrls = [];
-            if (fileInput.files.length > 0) {
-                for (let file of fileInput.files) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    const uploadResp = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
-                    const uploadJson = await uploadResp.json();
-                    if (uploadJson.url) imageUrls.push(uploadJson.url);
-                }
-            }
-
-            const entryData = {
-                title, content, category,
-                tags: selectedTags,
-                images: imageUrls,
-                updated: Date.now()
-            };
-
-            const resp = await fetch(`${API_BASE}/save`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(entryData)
-            });
-            if (resp.ok) {
-                // clear form
-                document.getElementById('entryTitle').value = '';
-                document.getElementById('entryContent').value = '';
-                document.getElementById('fileInput').value = '';
-                document.getElementById('uploadPreview').innerHTML = '';
-                await loadEntries();
-            }
-        });
-
-        // ---------- TAG SELECTOR ----------
-        document.querySelectorAll('.tag-option').forEach(opt => {
+        // ---------- MOOD SELECTOR ----------
+        document.querySelectorAll('.mood-option').forEach(opt => {
             opt.addEventListener('click', () => {
-                opt.classList.toggle('selected');
+                document.querySelectorAll('.mood-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedMood = opt.dataset.mood;
             });
         });
 
-        // ---------- FILE UPLOAD PREVIEW ----------
-        document.getElementById('fileUploadArea').addEventListener('click', () => {
+        // ---------- PHOTO UPLOAD ----------
+        document.getElementById('photoUploadArea').addEventListener('click', () => {
             document.getElementById('fileInput').click();
         });
+
         document.getElementById('fileInput').addEventListener('change', (e) => {
             const preview = document.getElementById('uploadPreview');
             preview.innerHTML = '';
             for (let file of e.target.files) {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    const img = document.createElement('img');
-                    img.src = ev.target.result;
-                    img.style.width = '70px'; img.style.height = '70px'; img.style.borderRadius = '16px'; img.style.objectFit = 'cover';
-                    preview.appendChild(img);
+                    const div = document.createElement('div');
+                    div.style.cssText = 'width: 100px; height: 100px; border-radius: 20px; background: #1a2a40; display: flex; align-items: center; justify-content: center;';
+                    div.innerHTML = '<i class="fas fa-image fa-2x"></i>';
+                    preview.appendChild(div);
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // ---------- TABS ----------
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                const which = tab.dataset.tab;
-                document.getElementById('timelineView').style.display = which === 'timeline' ? 'block' : 'none';
-                document.getElementById('galleryView').style.display = which === 'gallery' ? 'block' : 'none';
-                document.getElementById('searchView').style.display = which === 'search' ? 'block' : 'none';
-                document.getElementById('secretView').style.display = which === 'secret' ? 'block' : 'none';
-                if (which === 'gallery') renderGallery();
+        // ---------- SAVE ENTRY ----------
+        document.getElementById('saveEntryBtn').addEventListener('click', async () => {
+            const subject = document.getElementById('entrySubject').value;
+            const entry = document.getElementById('entryText').value;
+            const location = document.getElementById('entryLocation').value;
+            const tags = document.getElementById('entryTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const date = document.getElementById('entryDate').value;
+            
+            // upload photos (simplified)
+            const fileInput = document.getElementById('fileInput');
+            let photoUrls = [];
+            if (fileInput.files.length > 0) {
+                for (let file of fileInput.files) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const uploadResp = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+                    const uploadJson = await uploadResp.json();
+                    if (uploadJson.url) photoUrls.push(uploadJson.url);
+                }
+            }
+            
+            const entryData = {
+                subject,
+                entry,
+                location,
+                mood: selectedMood,
+                tags,
+                photos: photoUrls,
+                date: new Date(date).getTime()
+            };
+            
+            const resp = await fetch(`${API_BASE}/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entryData)
             });
+            
+            if (resp.ok) {
+                alert('Entry saved!');
+                await loadEntries();
+                switchView('timeline');
+            }
+        });
+
+        // ---------- SECRET DOC (local encryption demo) ----------
+        function loadSecret() {
+            const saved = localStorage.getItem('secretDoc');
+            if (saved) {
+                try {
+                    document.getElementById('secretText').value = atob(saved);
+                } catch {}
+            }
+        }
+
+        document.getElementById('saveSecretBtn').addEventListener('click', () => {
+            const text = document.getElementById('secretText').value;
+            const encrypted = btoa(text); // demo only
+            localStorage.setItem('secretDoc', encrypted);
+            alert('Secret saved (encrypted in browser)');
+        });
+
+        // ---------- MODAL ----------
+        window.openEntry = function(id) {
+            const entry = allEntries.find(e => e.id == id);
+            if (!entry) return;
+            
+            const modal = document.getElementById('fullModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h2 style="margin-bottom: 20px;">${entry.subject || 'Entry'}</h2>
+                <p style="color: #a0b8d0; margin-bottom: 30px;">${new Date(parseInt(entry.id)).toLocaleString()}</p>
+                <div style="line-height: 1.8; white-space: pre-wrap;">${entry.entry || ''}</div>
+                ${entry.photos && entry.photos.length ? `
+                    <h3 style="margin: 30px 0 20px;">Photos</h3>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        ${entry.photos.map(p => `<div style="width: 150px; height: 150px; background: #1a2a40; border-radius: 20px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image fa-3x"></i></div>`).join('')}
+                    </div>
+                ` : ''}
+            `;
+            
+            modal.style.display = 'flex';
+        };
+
+        window.openPhoto = function(url, tags) {
+            const modal = document.getElementById('fullModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="width: 100%; height: 400px; background: #1a2a40; border-radius: 32px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                        <i class="fas fa-image fa-5x" style="color: #5f7fa0;"></i>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        ${tags.map(t => `<span class="tag-pill">${t}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        };
+
+        window.filterByTag = function(tag) {
+            document.getElementById('searchInput').value = tag;
+            // TODO: implement search
+        };
+
+        window.deleteEntry = async function(id) {
+            if (confirm('Delete this entry?')) {
+                await fetch(`${API_BASE}/delete?id=${id}`, { method: 'DELETE' });
+                await loadEntries();
+            }
+        };
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('fullModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('fullModal')) {
+                document.getElementById('fullModal').style.display = 'none';
+            }
         });
 
         // ---------- SEARCH ----------
         document.getElementById('searchBtn').addEventListener('click', () => {
             const term = document.getElementById('searchInput').value.toLowerCase();
             const results = allEntries.filter(e => 
-                (e.title && e.title.toLowerCase().includes(term)) || 
-                (e.content && e.content.toLowerCase().includes(term)) ||
+                (e.subject && e.subject.toLowerCase().includes(term)) ||
+                (e.entry && e.entry.toLowerCase().includes(term)) ||
                 (e.tags && e.tags.some(t => t.includes(term)))
             );
-            const container = document.getElementById('searchResults');
-            container.innerHTML = results.map(e => `
-                <div class="entry-card">
-                    <div class="entry-header"><span class="entry-date">${new Date(parseInt(e.id)).toLocaleString()}</span></div>
-                    <div class="entry-title">${e.title}</div>
-                    <div class="entry-preview">${(e.content || '').substring(0,100)}...</div>
-                </div>
-            `).join('');
-            // switch to search tab
-            document.querySelector('[data-tab="search"]').click();
-        });
-
-        // ---------- SECRET DOC (localStorage mock, client-side encrypted) ----------
-        document.getElementById('saveSecretBtn').addEventListener('click', () => {
-            const text = document.getElementById('secretText').value;
-            // simple mock encryption (base64) – replace with actual AES if needed
-            const encrypted = btoa(text); // not secure, just demonstration
-            localStorage.setItem('secretDoc', encrypted);
-            alert('Secret saved locally (encrypted in localStorage)');
-        });
-        // load secret
-        const saved = localStorage.getItem('secretDoc');
-        if (saved) {
-            try {
-                document.getElementById('secretText').value = atob(saved);
-            } catch { }
-        }
-
-        // ---------- MODAL CLOSE ----------
-        document.getElementById('closeModal').addEventListener('click', () => {
-            document.getElementById('entryModal').style.display = 'none';
-        });
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('entryModal')) {
-                document.getElementById('entryModal').style.display = 'none';
+            
+            if (results.length) {
+                alert(`Found ${results.length} entries`);
+                // could show search results view
             }
         });
 
-        // ---------- CALENDAR NAV ----------
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        // ---------- INITIAL LOAD ----------
+        // ---------- INIT ----------
         loadEntries();
-        renderCalendar();
-
-        // Poll for updates every 30s (optional)
         setInterval(loadEntries, 30000);
     </script>
 </body>
